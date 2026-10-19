@@ -9,7 +9,7 @@ $admin = $admin ?? false;
     <a class="brand" href="<?= e(url($admin ? '/admin' : '/dashboard')) ?>" aria-label="GLOW <?= $admin ? 'admin' : 'dashboard' ?>">
         <span class="brand__word">GL<span class="brand__o">O</span>W</span><?php if ($admin) : ?><span class="brand__tag">Admin</span><?php endif ?>
     </a>
-    <span class="demo-badge">Demo Mode - Sample Data</span>
+    <span class="demo-badge">WEALTH IN PROGRESS</span>
     <div class="topbar__actions">
         <form method="post" action="<?= e(url($admin ? '/admin/logout' : '/logout')) ?>">
             <?= Csrf::field() ?>

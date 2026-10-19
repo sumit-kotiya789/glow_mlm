@@ -48,6 +48,7 @@ final class DashboardController
             ),
             'activeCount' => $summary['active'],
             'trades' => TradePair::all(),
+            'scripts' => ['js/ticker.js'],
         ]);
     }
 

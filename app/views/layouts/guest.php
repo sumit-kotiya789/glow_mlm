@@ -21,7 +21,7 @@ $neon = !str_starts_with(current_path(), '/admin'); // admin login keeps the cla
     <span class="guest-bg__orb"></span>
 </div>
 <header class="guest-header">
-    <span class="demo-badge">Demo Mode - Sample Data</span>
+    <span class="demo-badge">WEALTH IN PROGRESS</span>
 </header>
 <main id="main" class="guest-main">
 <?= $content ?>

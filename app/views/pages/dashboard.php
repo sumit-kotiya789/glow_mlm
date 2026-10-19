@@ -41,7 +41,7 @@ $selfOk = $salary['self'] >= $salary['self_need'];
             <p class="hero__meta">
                 <span class="hero__code"><?= e($user['user_code']) ?></span>
                 <button class="copy-mini" type="button" data-copy="<?= e($user['user_code']) ?>"
-                        data-copy-msg="User ID copied" aria-label="Copy user ID"><?= icon('copy', 16) ?></button>
+                    data-copy-msg="User ID copied" aria-label="Copy user ID"><?= icon('copy', 16) ?></button>
                 <span class="hero__dot" aria-hidden="true"></span>
                 <span>Joined <?= e(fmt_date($user['created_at'])) ?></span>
             </p>
@@ -52,8 +52,21 @@ $selfOk = $salary['self'] >= $salary['self_need'];
         <div class="copy-field">
             <input class="copy-field__input" id="ref-link" type="text" readonly value="<?= e($referral) ?>">
             <button class="copy-field__btn" type="button" data-copy="<?= e($referral) ?>"
-                    data-copy-msg="Referral link copied" aria-label="Copy referral link"><?= icon('copy', 20) ?></button>
+                data-copy-msg="Referral link copied" aria-label="Copy referral link"><?= icon('copy', 20) ?></button>
         </div>
+    </div>
+</section>
+
+<section class="ticker" aria-label="Live prices of top cryptocurrencies" data-ticker>
+    <div class="ticker__head">
+        <h2 class="ticker__title">Live Crypto Prices</h2>
+        <span class="ticker__status" data-ticker-status>Loading…</span>
+    </div>
+    <div class="ticker__row">
+        <div class="ticker__track" data-ticker-track></div>
+    </div>
+    <div class="ticker__row">
+        <div class="ticker__track ticker__track--rev" data-ticker-track></div>
     </div>
 </section>
 
@@ -70,7 +83,7 @@ $selfOk = $salary['self'] >= $salary['self_need'];
 </section>
 
 <nav class="quick-grid" aria-label="Quick actions">
-    <?php foreach ($quick as [$href, $label, $ico]) : ?>
+    <?php foreach ($quick as [$href, $label, $ico]): ?>
         <a class="quick-grid__item" href="<?= e(url($href)) ?>">
             <span class="quick-grid__icon"><?= icon($ico, 22) ?></span>
             <span class="quick-grid__label"><?= e($label) ?></span>
@@ -87,7 +100,7 @@ foreach ($conditions as [$label, $have, $need]) {
     $shown = min($have, $need);
     $gates[] = [$label, $need > 0 ? round($shown / $need * 100) : 100, 'count', $shown, 'of ' . $need, $shown >= $need];
 }
-$doneCount = count(array_filter($gates, static fn ($g) => $g[5]));
+$doneCount = count(array_filter($gates, static fn($g) => $g[5]));
 ?>
 <section class="salary-card" aria-labelledby="salary-title" data-reveal>
     <span class="salary-card__watermark" aria-hidden="true"><?= icon('gift', 150) ?></span>
@@ -95,23 +108,31 @@ $doneCount = count(array_filter($gates, static fn ($g) => $g[5]));
         <span class="salary-head__badge" aria-hidden="true"><?= icon('gift', 26) ?></span>
         <div>
             <h2 class="salary-card__title" id="salary-title">Monthly Salary</h2>
-            <p class="salary-card__sub">Earn <?= e(money($salary['amount'])) ?> per month for <?= e($salary['months']) ?> months!
-                <span class="salary-card__total">(<?= e(money($salary['amount'] * $salary['months'])) ?> Total)</span></p>
+            <p class="salary-card__sub">Earn <?= e(money($salary['amount'])) ?> per month for
+                <?= e($salary['months']) ?> months!
+                <span class="salary-card__total">(<?= e(money($salary['amount'] * $salary['months'])) ?> Total)</span>
+            </p>
         </div>
     </header>
 
     <ul class="gates" aria-label="Qualification steps">
-        <?php foreach ($gates as $i => [$label, $pct, $kind, $value, $sub, $done]) : ?>
+        <?php foreach ($gates as $i => [$label, $pct, $kind, $value, $sub, $done]): ?>
             <li class="gate<?= $done ? ' is-done' : '' ?>" data-anim style="--p:<?= e($pct) ?>;--d:<?= e($i + 1) ?>">
-                <div class="gate__ring" role="img" aria-label="<?= e($label) ?>: <?= e($pct) ?> percent<?= $done ? ', completed' : '' ?>">
+                <div class="gate__ring" role="img"
+                    aria-label="<?= e($label) ?>: <?= e($pct) ?> percent<?= $done ? ', completed' : '' ?>">
                     <svg viewBox="0 0 80 80" aria-hidden="true">
-                        <circle class="ring__track" cx="40" cy="40" r="34" pathLength="100"/>
-                        <circle class="ring__bar" cx="40" cy="40" r="34" pathLength="100"/>
+                        <circle class="ring__track" cx="40" cy="40" r="34" pathLength="100" />
+                        <circle class="ring__bar" cx="40" cy="40" r="34" pathLength="100" />
                     </svg>
                     <span class="gate__value">
-                        <?php if ($kind === 'count') : ?><b data-count="<?= e($value) ?>"><?= e($value) ?></b><?php else : ?><b><?= e($value) ?></b><?php endif ?>
+                        <?php if ($kind === 'count'): ?><b
+                                data-count="<?= e($value) ?>"><?= e($value) ?></b><?php else: ?><b><?= e($value) ?></b><?php endif ?>
                     </span>
-                    <?php if ($done) : ?><span class="gate__tick"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><?php endif ?>
+                    <?php if ($done): ?><span class="gate__tick"><svg viewBox="0 0 24 24" width="14" height="14"
+                                fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path d="m5 12.5 4.5 4.5L19 7.5" />
+                            </svg></span><?php endif ?>
                 </div>
                 <p class="gate__label"><?= e($label) ?></p>
                 <p class="gate__sub"><?= e($sub) ?></p>
@@ -120,26 +141,39 @@ $doneCount = count(array_filter($gates, static fn ($g) => $g[5]));
     </ul>
 
     <div class="salary-meter" data-anim style="--d:4">
-        <div class="salary-meter__row"><span>Steps complete</span><span class="text-gold"><?= e($doneCount) ?> / <?= e(count($gates)) ?></span></div>
+        <div class="salary-meter__row"><span>Steps complete</span><span class="text-gold"><?= e($doneCount) ?> /
+                <?= e(count($gates)) ?></span></div>
         <div class="salary-meter__bar" aria-hidden="true">
-            <?php for ($k = 0; $k < count($gates); $k++) : ?><i class="<?= $k < $doneCount ? 'is-on' : '' ?>" style="--k:<?= e($k) ?>"></i><?php endfor ?>
+            <?php for ($k = 0; $k < count($gates); $k++): ?><i class="<?= $k < $doneCount ? 'is-on' : '' ?>"
+                    style="--k:<?= e($k) ?>"></i><?php endfor ?>
         </div>
     </div>
 
-    <?php if ($salary['qualified']) : ?>
+    <?php if ($salary['qualified']): ?>
         <p class="countdown-pill countdown-pill--ok" data-anim style="--d:5">
             <?= icon('check-circle', 20) ?>
-            <span>Qualified · <?= e($salary['months_paid']) ?> of <?= e($salary['months']) ?> paid · next <?= e(fmt_date($salary['next_pay'])) ?></span>
+            <span>Qualified · <?= e($salary['months_paid']) ?> of <?= e($salary['months']) ?> paid · next
+                <?= e(fmt_date($salary['next_pay'])) ?></span>
         </p>
-    <?php elseif ($salary['window_open']) : ?>
+    <?php elseif ($salary['window_open']): ?>
         <p class="countdown-pill" data-anim style="--d:5">
             <span class="pulse-dot" aria-hidden="true"></span>
-            <span>Time Left: <span data-countdown="<?= e(date(DATE_ATOM, strtotime($salary['deadline']))) ?>">calculating…</span></span>
+            <span>Time Left: <span
+                    data-countdown="<?= e(date(DATE_ATOM, strtotime($salary['deadline']))) ?>">calculating…</span></span>
         </p>
-    <?php else : ?>
-        <p class="countdown-pill countdown-pill--off" data-anim style="--d:5"><?= icon('alert', 20) ?><span>Qualification window closed</span></p>
+    <?php else: ?>
+        <p class="countdown-pill countdown-pill--off" data-anim style="--d:5"><?= icon('alert', 20) ?><span>Qualification
+                window closed</span></p>
     <?php endif ?>
-    <noscript><style>.salary-card [data-anim], .salary-card .ring__bar { animation: none !important; opacity: 1 !important; }</style></noscript>
+    <noscript>
+        <style>
+            .salary-card [data-anim],
+            .salary-card .ring__bar {
+                animation: none !important;
+                opacity: 1 !important;
+            }
+        </style>
+    </noscript>
 </section>
 
 <section aria-labelledby="plans-title">
@@ -155,16 +189,17 @@ $doneCount = count(array_filter($gates, static fn ($g) => $g[5]));
     <section class="card my-packages" aria-labelledby="mine-title">
         <h2 class="my-packages__title" id="mine-title">My Packages</h2>
         <p class="eyebrow">GLOW · <?= e($activeCount) ?> active</p>
-        <?php if (!$plans) : ?>
+        <?php if (!$plans): ?>
             <p class="empty-dashed">No Active Packages Found</p>
-        <?php else : ?>
+        <?php else: ?>
             <ul class="owned-list">
-                <?php foreach ($plans as $p) : ?>
+                <?php foreach ($plans as $p): ?>
                     <li class="owned-item">
                         <div>
                             <p class="owned-item__name"><?= e(Investment::label($p)) ?></p>
                             <p class="owned-item__meta"><?= e(Investment::progressLabel($p)) ?>
-                                <?= (int) $p['days_paid'] === 0 ? '· first payout ' . e(Investment::firstPayout($p)) : '' ?></p>
+                                <?= (int) $p['days_paid'] === 0 ? '· first payout ' . e(Investment::firstPayout($p)) : '' ?>
+                            </p>
                         </div>
                         <div class="owned-item__nums">
                             <p class="text-gold"><?= e(money($p['principal'])) ?></p>

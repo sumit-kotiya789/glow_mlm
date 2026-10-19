@@ -1,6 +1,6 @@
 # GLOW — Business Rules (locked 15-Oct-2026)
 
-DEMO ONLY: no real payments or blockchain calls. Deposit address is a placeholder, tx hashes are stored
+no real payments or blockchain calls. Deposit address is a placeholder, tx hashes are stored
 but never verified, withdrawals are "paid" by an admin clicking a status button.
 Every number marked (cfg) is an admin setting.
 

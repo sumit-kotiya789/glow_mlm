@@ -13,7 +13,7 @@
 use App\Csrf;
 
 ?>
-<?php partial('page-head', ['heading' => 'Admin Dashboard', 'subtitle' => 'Platform overview. Demo data only.', 'icon' => 'home']) ?>
+<?php partial('page-head', ['heading' => 'Admin Dashboard', 'subtitle' => 'Platform overview.', 'icon' => 'home']) ?>
 
 <section class="stat-grid" aria-label="Platform totals">
     <?php foreach ($stats as $card) {

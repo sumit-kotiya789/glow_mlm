@@ -25,7 +25,7 @@ use App\Router;
 
 require dirname(__DIR__) . '/app/helpers.php';
 
-// Zero-config: build the SQLite demo DB on first run.
+// Zero-config: build the SQLite  DB on first run.
 $dsn = (string) config('db.dsn');
 if (str_starts_with($dsn, 'sqlite:') && !is_file(substr($dsn, 7))) {
     require APP_ROOT . '/db/seed.php';

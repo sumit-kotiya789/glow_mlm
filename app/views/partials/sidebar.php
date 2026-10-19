@@ -5,8 +5,8 @@ use App\Csrf;
 $sections = [
     'Main Menu' => [
         ['/dashboard', 'Dashboard', 'home'],
-        ['/live-feed', 'System Live Feed', 'activity'],
-        ['/live-trading', 'Live Trading', 'trending'],
+        // ['/live-feed', 'System Live Feed', 'activity'],
+        // ['/live-trading', 'Live Trading', 'trending'],
         ['/profile', 'My Profile', 'user-circle'],
         ['/package-details', 'Package Details', 'zap'],
         ['/my-packages', 'My Packages', 'box'],

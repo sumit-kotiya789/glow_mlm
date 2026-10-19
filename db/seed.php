@@ -1,7 +1,7 @@
 <?php
 
 /**
- * GLOW seeder. Drops and recreates every table, then builds demo data by running the real
+ * GLOW seeder. Drops and recreates every table, then builds  data by running the real
  * engine (deposits, investments, daily payouts), so every number on screen is consistent.
  *
  * Run: php db/seed.php            full demo data

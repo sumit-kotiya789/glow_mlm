@@ -44,7 +44,6 @@ use App\Csrf;
         <div class="qr-box" data-qr="<?= e($address) ?>" role="img" aria-label="QR code of the deposit address"></div>
         <p class="address-card__address"><?= e($address) ?></p>
         <button class="btn btn--gold" type="button" data-copy="<?= e($address) ?>" data-copy-msg="Address copied">Copy Address</button>
-        <p class="form__note"><?= icon('alert', 16) ?> Demo placeholder address. Do not send real funds.</p>
     </section>
 </div>
 

@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="<?= $theme === 'neon' ? '#04090a' : '#0a1020' ?>">
 <meta name="robots" content="noindex">
-<title><?= e($title ?? 'GLOW') ?> · GLOW Demo</title>
+<title><?= e($title ?? 'GLOW') ?> · GLOW</title>
 <link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

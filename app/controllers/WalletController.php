@@ -17,7 +17,6 @@ use DomainException;
 
 /**
  * Deposit requests, withdrawal requests, histories and income history.
- * Demo: nothing touches a blockchain; the admin approves / pays by clicking.
  */
 final class WalletController
 {

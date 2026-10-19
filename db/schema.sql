@@ -1,4 +1,4 @@
--- GLOW demo schema. Plain SQL that runs on MySQL/MariaDB and SQLite.
+-- GLOW  schema. Plain SQL that runs on MySQL/MariaDB and SQLite.
 -- {{AUTO_ID}} is replaced by seed.php with the driver's auto-increment primary key.
 -- Business rules: docs/RULES.md
 

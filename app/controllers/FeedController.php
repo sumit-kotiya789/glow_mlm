@@ -25,7 +25,7 @@ final class FeedController
         view('list', [
             'title' => 'System Live Feed',
             'heading' => 'System Live Feed',
-            'subtitle' => 'Recent platform activity (demo data).',
+            'subtitle' => 'Recent platform activity.',
             'icon' => 'activity',
             'columns' => ['time' => 'Time', 'event' => 'Event', 'who' => 'User ID', 'amount' => 'Amount'],
             'rows' => $rows,

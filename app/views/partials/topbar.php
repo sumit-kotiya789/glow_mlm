@@ -10,7 +10,7 @@ use App\Csrf;
         <span class="brand__word">GL<span class="brand__o">O</span>W</span>
     </a>
     <p class="topbar__title"><?= e($title ?? 'Dashboard') ?></p>
-    <span class="demo-badge">Demo · Sample Data</span>
+    <span class="demo-badge">WEALTH IN PROGRESS</span>
     <div class="topbar__actions">
         <form method="post" action="<?= e(url('/logout')) ?>">
             <?= Csrf::field() ?>

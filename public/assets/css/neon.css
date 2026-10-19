@@ -692,3 +692,27 @@ body.guest { background: var(--bg); }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- Live crypto ticker (dashboard) ---------- */
+.ticker { display: grid; gap: 10px; padding: 14px 0 12px; overflow: hidden; background: linear-gradient(135deg, var(--surface-2), var(--surface)); border: 1px solid var(--neon-line); border-radius: 20px; box-shadow: var(--glow-soft); }
+.ticker__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 16px; }
+.ticker__title { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--neon); }
+.ticker__status { font-size: 11px; color: var(--muted); }
+.ticker__row { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.ticker__track { display: flex; width: max-content; padding: 2px 0; animation: ticker-scroll var(--ticker-time, 60s) linear infinite; }
+.ticker__track--rev { animation-direction: reverse; }
+.ticker__row:hover .ticker__track { animation-play-state: paused; }
+.coin { display: flex; flex: none; align-items: center; gap: 10px; width: 215px; margin-right: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.coin__logo { flex: none; width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: var(--surface-3); }
+.coin__badge { display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--neon); }
+.coin__info { flex: 1; min-width: 0; }
+.coin__name { margin: 0; overflow: hidden; font-size: 13px; font-weight: 600; color: var(--text); text-overflow: ellipsis; white-space: nowrap; }
+.coin__sym { margin: 2px 0 0; font-size: 11px; letter-spacing: .06em; color: var(--muted); }
+.coin__quote { text-align: right; }
+.coin__price { margin: 0; font-size: 13px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.coin__chg { margin: 2px 0 0; font-size: 11px; font-weight: 600; min-height: 1em; }
+@keyframes ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+    .ticker__track { animation: none; }
+    .ticker__row { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+}

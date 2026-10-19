@@ -9,7 +9,6 @@ use DomainException;
 
 /**
  * USDT deposit requests: user submits amount + tx hash, admin approves or rejects.
- * Demo: the hash is stored only, never checked on-chain.
  */
 final class Deposit
 {

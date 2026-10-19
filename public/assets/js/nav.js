@@ -56,4 +56,41 @@
         }
         startY = null;
     }, { passive: true });
+
+    // Scroll-reveal for [data-reveal] cards + count-up for [data-count] numbers.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const countUp = (root) => root.querySelectorAll('[data-count]').forEach((el) => {
+        const end = Number(el.dataset.count) || 0;
+        if (reduced || end === 0) {
+            el.textContent = String(end);
+            return;
+        }
+        const start = performance.now();
+        const dur = 1100;
+        el.textContent = '0';
+        const step = (now) => {
+            const t = Math.min(1, (now - start) / dur);
+            el.textContent = String(Math.round(end * (1 - (1 - t) ** 3)));
+            if (t < 1) {
+                requestAnimationFrame(step);
+            }
+        };
+        setTimeout(() => requestAnimationFrame(step), 350);
+    });
+    const reveal = (el) => {
+        el.classList.add('is-in');
+        countUp(el);
+    };
+    const targets = document.querySelectorAll('[data-reveal]');
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                reveal(entry.target);
+                io.unobserve(entry.target);
+            }
+        }), { threshold: 0.25 });
+        targets.forEach((el) => io.observe(el));
+    } else {
+        targets.forEach(reveal);
+    }
 })();

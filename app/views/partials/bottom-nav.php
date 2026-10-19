@@ -6,11 +6,13 @@ $items = [
     ['/dashboard', 'Home', 'home'],
     ['/wallet', 'Wallet', 'wallet'],
     ['/package-details', 'Invest', 'zap', true],
-    ['/direct-team', 'Team', 'users'],
+    ['/level-team', 'Team', 'users'],
 ];
 ?>
 <nav class="bottom-nav" aria-label="Quick navigation">
-    <?php foreach ($items as [$path, $label, $ico, $hero]) : ?>
+    <?php foreach ($items as $item) :
+        [$path, $label, $ico] = $item;
+        $hero = $item[3] ?? false; ?>
         <a class="bottom-nav__item<?= $here === $path ? ' is-active' : '' ?><?= !empty($hero) ? ' bottom-nav__item--hero' : '' ?>"
            href="<?= e(url($path)) ?>"<?= $here === $path ? ' aria-current="page"' : '' ?>>
             <span class="bottom-nav__icon"><?= icon($ico, 22) ?></span>

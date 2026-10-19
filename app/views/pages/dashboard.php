@@ -18,7 +18,7 @@ $quick = [
     ['/package-details', 'Invest', 'zap'],
     ['/withdrawal', 'Withdraw', 'card'],
     ['/my-packages', 'My Plans', 'box'],
-    ['/direct-team', 'Team', 'users'],
+    ['/level-team', 'Team', 'users'],
     ['/wallet', 'Wallet', 'wallet'],
     ['/support', 'Support', 'headset'],
     ['/calculator', 'Calculator', 'calculator'],
@@ -71,44 +71,69 @@ $selfOk = $salary['self'] >= $salary['self_need'];
     <?php endforeach ?>
 </nav>
 
-<section class="salary-card" aria-labelledby="salary-title">
-        <span class="salary-card__watermark" aria-hidden="true"><?= icon('gift', 150) ?></span>
-        <h2 class="salary-card__title" id="salary-title">Monthly Salary</h2>
-        <p class="salary-card__sub">Earn <?= e(money($salary['amount'])) ?> per month for <?= e($salary['months']) ?> months!
-            (<?= e(money($salary['amount'] * $salary['months'])) ?> Total)</p>
-
-        <div class="salary-row">
-            <span>Self investment <?= e(money($salary['self_need'])) ?>+
-                <small class="text-muted">(<?= e(money($salary['self'])) ?>)</small></span>
-            <span class="<?= $selfOk ? 'text-green' : 'text-muted' ?>" aria-label="<?= $selfOk ? 'Completed' : 'Not completed' ?>">
-                <?= icon($selfOk ? 'check-circle' : 'circle', 26) ?>
-            </span>
+<?php
+$selfPct = $salary['self_need'] > 0 ? min(100, round($salary['self'] / $salary['self_need'] * 100)) : 100;
+$gates = [
+    ['Self investment', $selfPct, 'money', '$' . number_format((float) $salary['self'], fmod((float) $salary['self'], 1) == 0.0 ? 0 : 2), 'Need ' . money($salary['self_need']) . '+', $selfOk],
+];
+foreach ($conditions as [$label, $have, $need]) {
+    $shown = min($have, $need);
+    $gates[] = [$label, $need > 0 ? round($shown / $need * 100) : 100, 'count', $shown, 'of ' . $need, $shown >= $need];
+}
+$doneCount = count(array_filter($gates, static fn ($g) => $g[5]));
+?>
+<section class="salary-card" aria-labelledby="salary-title" data-reveal>
+    <span class="salary-card__watermark" aria-hidden="true"><?= icon('gift', 150) ?></span>
+    <header class="salary-head" data-anim style="--d:0">
+        <span class="salary-head__badge" aria-hidden="true"><?= icon('gift', 26) ?></span>
+        <div>
+            <h2 class="salary-card__title" id="salary-title">Monthly Salary</h2>
+            <p class="salary-card__sub">Earn <?= e(money($salary['amount'])) ?> per month for <?= e($salary['months']) ?> months!
+                <span class="salary-card__total">(<?= e(money($salary['amount'] * $salary['months'])) ?> Total)</span></p>
         </div>
-        <?php foreach ($conditions as [$label, $have, $need]) :
-            $shown = min($have, $need); ?>
-            <div class="salary-level">
-                <div class="salary-level__row">
-                    <span><?= e($label) ?> (<?= e($need) ?>)</span>
-                    <span class="text-gold salary-level__count"><?= e($shown) ?> / <?= e($need) ?></span>
-                </div>
-                <progress class="progress" max="<?= e($need) ?>" value="<?= e($shown) ?>" aria-label="<?= e($label) ?>"><?= e($shown) ?></progress>
-            </div>
-        <?php endforeach ?>
+    </header>
 
-        <?php if ($salary['qualified']) : ?>
-            <p class="countdown-pill countdown-pill--ok">
-                <?= icon('check-circle', 20) ?>
-                <span>Qualified · <?= e($salary['months_paid']) ?> of <?= e($salary['months']) ?> paid · next <?= e(fmt_date($salary['next_pay'])) ?></span>
-            </p>
-        <?php elseif ($salary['window_open']) : ?>
-            <p class="countdown-pill">
-                <?= icon('clock', 20) ?>
-                <span>Time Left: <span data-countdown="<?= e(date(DATE_ATOM, strtotime($salary['deadline']))) ?>">calculating…</span></span>
-            </p>
-        <?php else : ?>
-            <p class="countdown-pill countdown-pill--off"><?= icon('alert', 20) ?><span>Qualification window closed</span></p>
-        <?php endif ?>
-    </section>
+    <ul class="gates" aria-label="Qualification steps">
+        <?php foreach ($gates as $i => [$label, $pct, $kind, $value, $sub, $done]) : ?>
+            <li class="gate<?= $done ? ' is-done' : '' ?>" data-anim style="--p:<?= e($pct) ?>;--d:<?= e($i + 1) ?>">
+                <div class="gate__ring" role="img" aria-label="<?= e($label) ?>: <?= e($pct) ?> percent<?= $done ? ', completed' : '' ?>">
+                    <svg viewBox="0 0 80 80" aria-hidden="true">
+                        <circle class="ring__track" cx="40" cy="40" r="34" pathLength="100"/>
+                        <circle class="ring__bar" cx="40" cy="40" r="34" pathLength="100"/>
+                    </svg>
+                    <span class="gate__value">
+                        <?php if ($kind === 'count') : ?><b data-count="<?= e($value) ?>"><?= e($value) ?></b><?php else : ?><b><?= e($value) ?></b><?php endif ?>
+                    </span>
+                    <?php if ($done) : ?><span class="gate__tick"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><?php endif ?>
+                </div>
+                <p class="gate__label"><?= e($label) ?></p>
+                <p class="gate__sub"><?= e($sub) ?></p>
+            </li>
+        <?php endforeach ?>
+    </ul>
+
+    <div class="salary-meter" data-anim style="--d:4">
+        <div class="salary-meter__row"><span>Steps complete</span><span class="text-gold"><?= e($doneCount) ?> / <?= e(count($gates)) ?></span></div>
+        <div class="salary-meter__bar" aria-hidden="true">
+            <?php for ($k = 0; $k < count($gates); $k++) : ?><i class="<?= $k < $doneCount ? 'is-on' : '' ?>" style="--k:<?= e($k) ?>"></i><?php endfor ?>
+        </div>
+    </div>
+
+    <?php if ($salary['qualified']) : ?>
+        <p class="countdown-pill countdown-pill--ok" data-anim style="--d:5">
+            <?= icon('check-circle', 20) ?>
+            <span>Qualified · <?= e($salary['months_paid']) ?> of <?= e($salary['months']) ?> paid · next <?= e(fmt_date($salary['next_pay'])) ?></span>
+        </p>
+    <?php elseif ($salary['window_open']) : ?>
+        <p class="countdown-pill" data-anim style="--d:5">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span>Time Left: <span data-countdown="<?= e(date(DATE_ATOM, strtotime($salary['deadline']))) ?>">calculating…</span></span>
+        </p>
+    <?php else : ?>
+        <p class="countdown-pill countdown-pill--off" data-anim style="--d:5"><?= icon('alert', 20) ?><span>Qualification window closed</span></p>
+    <?php endif ?>
+    <noscript><style>.salary-card [data-anim], .salary-card .ring__bar { animation: none !important; opacity: 1 !important; }</style></noscript>
+</section>
 
 <section aria-labelledby="plans-title">
     <h2 class="section-title" id="plans-title">Investment Plans</h2>

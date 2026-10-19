@@ -122,8 +122,8 @@ table { border-collapse: collapse; }
 .icon-btn:hover { color: var(--neon); background: var(--neon-dim); }
 
 /* ---------- Sidebar (desktop) / sheet (mobile) ---------- */
-.sidebar-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(0, 6, 5, .65); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); opacity: 0; pointer-events: none; transition: opacity .3s var(--ease); }
-.sidebar-backdrop.is-open { opacity: 1; pointer-events: auto; }
+.sidebar-backdrop { position: fixed; inset: 0; z-index: 60; background: rgba(0, 6, 5, .65); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .3s var(--ease), visibility 0s .3s; }
+.sidebar-backdrop.is-open { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .3s var(--ease), visibility 0s; }
 
 .sidebar {
     position: fixed;
@@ -142,9 +142,10 @@ table { border-collapse: collapse; }
     border-radius: 24px 24px 0 0;
     box-shadow: 0 -20px 60px rgba(0, 0, 0, .7), 0 -1px 30px rgba(45, 255, 154, .12);
     transform: translateY(105%);
-    transition: transform .34s var(--ease);
+    visibility: hidden;
+    transition: transform .34s var(--ease), visibility 0s .34s;
 }
-.sidebar.is-open { transform: none; }
+.sidebar.is-open { transform: none; visibility: visible; transition: transform .34s var(--ease), visibility 0s; }
 .sidebar__grab { width: 44px; height: 4px; margin: 4px auto 10px; background: var(--neon-line); border-radius: 4px; }
 .sidebar__brand { display: none; }
 .sidebar__heading { margin: 16px 12px 6px; font-size: 11px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
@@ -163,20 +164,18 @@ table { border-collapse: collapse; }
     left: 10px;
     right: 10px;
     bottom: calc(10px + env(safe-area-inset-bottom));
-    z-index: 55;
+    z-index: 65;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     align-items: end;
     height: var(--bottom-h);
     padding: 0 6px;
-    background: rgba(9, 18, 20, .9);
+    background: #0a1517;
     border: 1px solid var(--neon-line);
     border-radius: 22px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, .65), 0 0 24px rgba(45, 255, 154, .1);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
 }
-.bottom-nav__item { display: grid; justify-items: center; align-content: center; gap: 3px; height: 100%; padding: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .04em; color: var(--muted); background: none; border: 0; transition: color .2s; }
+.bottom-nav__item { position: relative; z-index: 1; display: grid; justify-items: center; align-content: center; gap: 3px; height: 100%; padding: 0; font-size: 10.5px; font-weight: 500; letter-spacing: .04em; color: var(--muted); background: none; border: 0; transition: color .2s; }
 .bottom-nav__item:hover, .bottom-nav__item.is-active { color: var(--neon); }
 .bottom-nav__item.is-active .bottom-nav__icon { filter: drop-shadow(0 0 6px rgba(45, 255, 154, .8)); }
 .bottom-nav__item--hero { position: relative; }
@@ -333,6 +332,58 @@ textarea.input { resize: vertical; }
 .countdown-pill { display: flex; align-items: center; gap: 10px; padding: 12px 14px; font-size: 14px; font-variant-numeric: tabular-nums; color: var(--neon-2); background: rgba(25, 227, 208, .08); border: 1px solid rgba(25, 227, 208, .4); border-radius: var(--radius-sm); }
 .countdown-pill--ok { color: var(--neon); background: var(--neon-dim); border-color: var(--neon-line); }
 .countdown-pill--off { color: var(--muted); background: rgba(255, 255, 255, .03); border-color: var(--line); }
+
+/* Salary: animated qualification gates */
+.salary-head { display: flex; align-items: center; gap: 14px; }
+.salary-head__badge { display: grid; flex-shrink: 0; place-items: center; width: 48px; height: 48px; color: var(--ink); background: var(--grad); border-radius: 16px; box-shadow: var(--glow); animation: float 3.2s ease-in-out infinite; }
+.salary-card__sub { margin-top: 2px; font-size: 16px; }
+.salary-card__total { color: var(--neon); white-space: nowrap; }
+.salary-card::after { content: ''; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; pointer-events: none; background: linear-gradient(100deg, transparent, rgba(45, 255, 154, .09), transparent); transform: skewX(-18deg); animation: sweep 7s ease-in-out infinite; }
+
+.gates { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.gate { display: grid; justify-items: center; gap: 2px; padding: 14px 6px 12px; text-align: center; background: var(--bg); border: 1px solid var(--line); border-radius: 16px; transition: border-color .3s, box-shadow .3s, transform .3s var(--ease); }
+.gate:hover { transform: translateY(-3px); border-color: var(--neon-line); }
+.gate.is-done { border-color: var(--neon-line); box-shadow: inset 0 0 30px rgba(45, 255, 154, .08); }
+.gate__ring { position: relative; display: grid; place-items: center; width: 78px; height: 78px; margin-bottom: 6px; }
+.gate__ring > svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.gate__ring > svg circle { fill: none; stroke-width: 6; }
+.ring__track { stroke: rgba(255, 255, 255, .07); }
+.ring__bar { stroke: var(--neon); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: calc(100 - var(--p)); filter: drop-shadow(0 0 5px rgba(45, 255, 154, .8)); }
+.gate.is-done .ring__bar { stroke: var(--neon-2); animation: ring-pulse 2.4s ease-in-out infinite; }
+.gate__value { position: relative; font-family: var(--mono); font-size: 15px; font-weight: 600; line-height: 1; }
+.gate__tick { position: absolute; right: -4px; top: -4px; display: grid; place-items: center; width: 22px; height: 22px; color: var(--ink); background: var(--neon); border-radius: 50%; box-shadow: var(--glow); }
+.gate__label { font-size: 12.5px; font-weight: 600; line-height: 1.25; }
+.gate__sub { font-size: 11px; color: var(--muted); }
+
+.salary-meter { display: grid; gap: 8px; }
+.salary-meter__row { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.salary-meter__row .text-gold { font-family: var(--mono); letter-spacing: .06em; }
+.salary-meter__bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.salary-meter__bar i { position: relative; height: 8px; overflow: hidden; background: rgba(255, 255, 255, .07); border-radius: 99px; }
+.salary-meter__bar i.is-on::after { content: ''; position: absolute; inset: 0; background: var(--grad); border-radius: 99px; box-shadow: 0 0 12px rgba(45, 255, 154, .7); transform-origin: left; }
+
+.pulse-dot { position: relative; flex-shrink: 0; width: 10px; height: 10px; margin: 0 5px; background: var(--neon-2); border-radius: 50%; }
+.pulse-dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--neon-2); animation: ping 1.6s cubic-bezier(0, 0, .2, 1) infinite; }
+.countdown-pill--ok { background: linear-gradient(100deg, var(--neon-dim), rgba(25, 227, 208, .18), var(--neon-dim)) 0 0 / 200% 100%; animation: shimmer 4s linear infinite; }
+
+/* Entrance: runs when the card scrolls into view (nav.js adds .is-in). */
+.salary-card[data-reveal]:not(.is-in) [data-anim] { opacity: 0; }
+.salary-card.is-in [data-anim] { animation: rise-in .6s var(--ease) both; animation-delay: calc(var(--d, 0) * 110ms); }
+.salary-card[data-reveal]:not(.is-in) .ring__bar { stroke-dashoffset: 100; }
+.salary-card.is-in .ring__bar { animation: ring-draw 1.2s var(--ease) both; animation-delay: calc(var(--d, 1) * 110ms + 200ms); }
+.salary-card[data-reveal]:not(.is-in) .salary-meter__bar i.is-on::after { transform: scaleX(0); }
+.salary-card.is-in .salary-meter__bar i.is-on::after { animation: bar-grow .7s var(--ease) both; animation-delay: calc(var(--k) * 220ms + 700ms); }
+.salary-card.is-in .gate.is-done .gate__tick { animation: pop .5s var(--ease) both; animation-delay: calc(var(--d, 1) * 110ms + 1100ms); }
+
+@keyframes rise-in { from { opacity: 0; transform: translateY(16px); } }
+@keyframes ring-draw { from { stroke-dashoffset: 100; } }
+@keyframes bar-grow { from { transform: scaleX(0); } }
+@keyframes pop { from { opacity: 0; transform: scale(0); } 70% { transform: scale(1.25); } }
+@keyframes float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+@keyframes sweep { 0%, 55% { left: -40%; } 100% { left: 140%; } }
+@keyframes ring-pulse { 0%, 100% { filter: drop-shadow(0 0 4px rgba(25, 227, 208, .6)); } 50% { filter: drop-shadow(0 0 10px rgba(25, 227, 208, 1)); } }
+@keyframes ping { 75%, 100% { transform: scale(2.6); opacity: 0; } }
+@keyframes shimmer { to { background-position: -200% 0; } }
 
 /* Plan term cards */
 .term-grid { display: grid; gap: 12px; }
@@ -611,6 +662,7 @@ body.guest { background: var(--bg); }
         border-radius: 0;
         box-shadow: 4px 0 40px rgba(0, 0, 0, .4);
         transform: none;
+        visibility: visible;
     }
     .sidebar__grab { display: none; }
     .sidebar__brand { display: flex; margin: 0 6px 8px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
@@ -630,8 +682,6 @@ body.guest { background: var(--bg); }
     .plan-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .table-scroll { max-height: 640px; overflow-y: auto; }
     .table--trade thead th { position: sticky; top: 0; z-index: 1; }
-    .salary-card { grid-template-columns: 1fr 1fr; column-gap: 28px; align-content: start; }
-    .salary-card > .salary-card__title, .salary-card > .salary-card__sub, .salary-card > .countdown-pill { grid-column: 1 / -1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -53,7 +53,7 @@ or withdraw 12 (-> 88).
 | Income         | Trigger                                                | Amount (cfg)              | Paid                       |
 | -------------- | ------------------------------------------------------ | ------------------------- | -------------------------- |
 | Direct sponsor | My level-1 downline **invests**                        | 10% of investment         | Every investment           |
-| Level deposit  | My level 2–10 downline **invests**                     | 0.25% per level           | Every investment           |
+| Level deposit  | My level 2–10 downline **invests**                     | 1% per level              | Every investment           |
 | ROI-on-ROI     | Level 1–10 downline's daily 4% principal part credited | % per level (10 settings) | Daily, compound plans only |
 | Lucky draw     | Admin runs a draw                                      | Prize + winner count      | When admin distributes     |
 | Salary         | All salary conditions met                              | $100 / month x 12         | Monthly, same day for all  |

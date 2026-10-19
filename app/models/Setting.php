@@ -23,8 +23,8 @@ final class Setting
         'min_transfer' => '1', // Minimum per P2P / wallet-to-Deposit transfer.
         'withdraw_fee_pct' => '10',
         'direct_pct' => '10',
-        'level_deposit_pct' => '0.25',
-        'roi_level_pcts' => '10,5,3,2,1,1,1,0.5,0.5,0.5', // ROI-on-ROI % for levels 1..10, applied to the downline's daily principal part.
+        'level_deposit_pct' => '1',
+        'roi_level_pcts' => '5,1,1,1,1,1,1,1,1,1', // ROI-on-ROI % for levels 1..10, applied to the downline's daily principal part.
         'salary_min_self' => '50',
         'salary_directs' => '5',
         'salary_level2' => '10',

@@ -185,7 +185,7 @@ CREATE TABLE `settings` (
 INSERT INTO `settings` (`name`, `value`) VALUES
 ('deposit_address', '0x0000000000000000000000000000000000000000'),
 ('direct_pct', '10'),
-('level_deposit_pct', '0.25'),
+('level_deposit_pct', '1'),
 ('lucky_prize', '100'),
 ('lucky_winners', '100'),
 ('max_invest', '1000'),
@@ -197,7 +197,7 @@ INSERT INTO `settings` (`name`, `value`) VALUES
 ('min_withdraw', '1'),
 ('payout_period', 'day'),
 ('payout_time', '00:00'),
-('roi_level_pcts', '10,5,3,2,1,1,1,0.5,0.5,0.5'),
+('roi_level_pcts', '5,1,1,1,1,1,1,1,1,1'),
 ('salary_amount', '100'),
 ('salary_directs', '5'),
 ('salary_level2', '10'),

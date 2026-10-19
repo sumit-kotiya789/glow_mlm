@@ -56,6 +56,7 @@ $wallets = [
                 <p class="field__hint" id="hint-p2p-amount">You can send <?= e(money($sendable)) ?> (signup bonus can't be sent) · minimum <?= e(money($min)) ?> · no fee · instant.</p>
                 <?= field_error('p2p_amount') ?>
             </div>
+            <?php partial('txn-field', ['id' => 'f-txn-p2p', 'errKey' => 'p2p_txn_password']) ?>
             <button class="btn btn--gold btn--block btn--lg" type="submit"<?= $canSend ? '' : ' disabled' ?>>Send</button>
         </form>
     </section>
@@ -88,6 +89,7 @@ $wallets = [
                 <p class="field__hint" id="hint-move-amount">Minimum <?= e(money($min)) ?> · no fee · instant.</p>
                 <?= field_error('move_amount') ?>
             </div>
+            <?php partial('txn-field', ['id' => 'f-txn-move', 'errKey' => 'move_txn_password']) ?>
             <button class="btn btn--gold btn--block btn--lg" type="submit">Move to Deposit</button>
         </form>
     </section>

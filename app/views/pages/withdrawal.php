@@ -64,11 +64,12 @@ $wallets = [
                     data-invalid="Enter <?= e(money($min)) ?> to <?= e(money(min($max, $left))) ?>.">
                 <p class="field__hint" id="hint-amount">
                     <?= e(money($min)) ?> – <?= e(money($max)) ?> per request · fee <?= e(pct($fee)) ?> ·
-                    daily limit = your active investment. Plan principal: withdraw from <a class="link-inline"
+                    daily limit = your investment (last matured plans if none is running). Plan principal: withdraw from <a class="link-inline"
                         href="<?= e(url('/my-packages')) ?>">My Packages</a>.
                 </p>
                 <?= field_error('amount') ?>
             </div>
+            <?php partial('txn-field', ['id' => 'f-txn-w', 'errKey' => 'txn_password']) ?>
             <dl class="fee-box" data-fee-box aria-live="polite">
                 <div>
                     <dt>Amount</dt>
@@ -96,7 +97,7 @@ $wallets = [
             <a class="link-gold" href="<?= e(url('/withdrawal-history')) ?>">View all</a>
         </div>
         <?php partial('data-table', [
-            'columns' => ['date' => 'Date', 'source' => 'From', 'amount' => 'Amount', 'net' => 'You Get', 'status' => 'Status'],
+            'columns' => ['date' => 'Date', 'source' => 'From', 'amount' => 'Amount', 'net' => 'You Get', 'status' => 'Status', 'bsc' => 'Verify in BSC'],
             'rows' => $recent,
             'empty' => 'No withdrawals yet',
         ]) ?>

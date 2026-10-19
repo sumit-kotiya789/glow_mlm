@@ -6,6 +6,8 @@ namespace App\Controllers;
 
 use App\Auth;
 use App\Models\Ticket;
+use App\Models\User;
+use DomainException;
 
 /**
  * Profile and support tickets.
@@ -28,7 +30,42 @@ final class ProfileController
                 ['Country', $user['country']],
             ],
             'wallet' => $user['wallet'],
+            'hasTxn' => !empty($user['txn_password_hash']),
         ]);
+    }
+
+    /** Set (first time, confirmed with the login password) or change (confirmed with the current one) the transaction password. */
+    public function saveTxnPassword(): void
+    {
+        $user = Auth::user();
+        $userId = (int) $user['id'];
+        $hasTxn = !empty($user['txn_password_hash']);
+        $new = password_input('new_txn_password');
+        $errors = [];
+
+        if ($hasTxn) {
+            try {
+                User::verifyTxnPassword($userId, password_input('current_txn_password'));
+            } catch (DomainException $e) {
+                $errors['current_txn_password'] = $e->getMessage();
+            }
+        } elseif (!password_verify(password_input('login_password'), $user['password_hash'])) {
+            $errors['login_password'] = 'Wrong login password.';
+        }
+        if (strlen($new) < 6 || strlen($new) > 64) {
+            $errors['new_txn_password'] = 'Transaction password must be 6-64 characters.';
+        } elseif (password_verify($new, $user['password_hash'])) {
+            $errors['new_txn_password'] = 'Must be different from your login password.';
+        }
+        if ($new !== password_input('confirm_txn_password')) {
+            $errors['confirm_txn_password'] = 'The two passwords do not match.';
+        }
+        if ($errors) {
+            fail('/profile#txn', $errors);
+        }
+        User::setTxnPassword($userId, $new);
+        toast($hasTxn ? 'Transaction password changed.' : 'Transaction password set.');
+        redirect('/profile#txn');
     }
 
     public function support(): void

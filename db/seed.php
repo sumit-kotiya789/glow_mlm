@@ -57,12 +57,13 @@ function seed_database(PDO $pdo): void
 {
     install_base($pdo);
     $hash = password_hash('demo1234', PASSWORD_DEFAULT);
+    $txnHash = password_hash('txn1234', PASSWORD_DEFAULT); // demo transaction password for every seeded member
     $countries = ['India', 'Nigeria', 'Indonesia', 'Brazil', 'Vietnam', 'Philippines', 'Kenya', 'Mexico'];
     $day = static fn (int $offset, string $time): string => date('Y-m-d', strtotime("$offset days")) . ' ' . $time;
     $tx = static fn (): string => '0x' . bin2hex(random_bytes(32));
     $n = 0;
 
-    $member = static function (string $code, string $name, ?int $sponsorId, string $at) use ($hash, $countries, &$n): int {
+    $member = static function (string $code, string $name, ?int $sponsorId, string $at) use ($hash, $txnHash, $countries, &$n): int {
         freeze_clock($at);
         $i = $n++;
         User::create([
@@ -73,6 +74,7 @@ function seed_database(PDO $pdo): void
             'country' => $countries[$i % count($countries)],
             'wallet' => sprintf('0x%040x', $i), // unique placeholder wallets: 0x000…0, 0x000…1, …
             'password_hash' => $hash,
+            'txn_password_hash' => $txnHash,
         ], $sponsorId);
         return (int) User::findByCode($code)['id'];
     };
@@ -229,6 +231,7 @@ function seed_fresh(PDO $pdo): void
         'country' => 'India',
         'wallet' => '0x0000000000000000000000000000000000000000',
         'password' => 'demo1234',
+        'txn_password' => 'txn1234',
     ], null);
     seed_trade_pairs();
 }
@@ -239,7 +242,7 @@ if (PHP_SAPI === 'cli' && realpath($_SERVER['argv'][0] ?? '') === __FILE__) {
         seed_fresh(Database::pdo());
         echo "Fresh start: all activity wiped, settings reset to defaults.
 "
-            . "Top member (sponsor for sign-ups): GL0000001 / demo1234, empty wallets
+            . "Top member (sponsor for sign-ups): GL0000001 / demo1234 (transaction password txn1234), empty wallets
 "
             . "Admin login: admin / admin1234
 ";

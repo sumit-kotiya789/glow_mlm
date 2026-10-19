@@ -82,7 +82,8 @@ Keeps paying even if the user later withdraws investments.
 
 - From ROI wallet, Income wallet, or a compound plan's pending principal.
 - $1–$1000 per request (cfg). Daily total limit = user's total active investment.
-  Confirmed on purpose: with no running plan the limit is $0, so the user must reinvest to withdraw.
+  With no running plan, the limit = the plans that matured most recently (same maturity day), so a member
+  whose plans finished can still withdraw up to that amount per day. Never invested = $0.
 - Fee 0% (cfg).
 - Request is **Pending**; admin sends funds manually and marks **Paid** (optional payout hash) or
   **Rejected** (amount returned to where it came from).

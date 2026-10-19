@@ -5,6 +5,7 @@ use App\Models\Investment;
 /**
  * @var array $user
  * @var list<array{label: string, value: string, tone: string}> $stats
+ * @var list<array{label: string, value: string, tone: string, hint: string}> $returns
  * @var array<string, mixed> $salary
  * @var string $referral
  * @var list<array> $terms
@@ -56,8 +57,14 @@ $selfOk = $salary['self'] >= $salary['self_need'];
     </div>
 </section>
 
-<section class="stat-grid" aria-label="Wallets and earnings">
+<section class="stat-grid stat-grid--4" aria-label="Wallets and earnings">
     <?php foreach ($stats as $card) {
+        partial('stat-card', $card);
+    } ?>
+</section>
+
+<section class="stat-grid stat-grid--returns" aria-label="ROI returns by plan type">
+    <?php foreach ($returns as $card) {
         partial('stat-card', $card);
     } ?>
 </section>

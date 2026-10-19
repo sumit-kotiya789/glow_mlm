@@ -58,6 +58,7 @@ $router->get('/dashboard', [DashboardController::class, 'index']);
 $router->get('/live-feed', [FeedController::class, 'liveFeed']);
 $router->get('/live-trading', [FeedController::class, 'liveTrading']);
 $router->get('/profile', [ProfileController::class, 'show']);
+$router->post('/profile/txn-password', [ProfileController::class, 'saveTxnPassword']);
 $router->get('/support', [ProfileController::class, 'support']);
 $router->post('/support', [ProfileController::class, 'createTicket']);
 

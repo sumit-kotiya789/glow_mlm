@@ -62,9 +62,55 @@ final class User
             'country' => $data['country'],
             'wallet' => $data['wallet'],
             'password_hash' => $data['password_hash'] ?? password_hash($data['password'], PASSWORD_DEFAULT),
+            'txn_password_hash' => $data['txn_password_hash']
+                ?? (isset($data['txn_password']) ? password_hash($data['txn_password'], PASSWORD_DEFAULT) : null),
             'created_at' => now(),
         ]);
         return $data['user_code'] ?? $code;
+    }
+
+    public const TXN_MAX_FAILS = 5;
+    public const TXN_LOCK_MINUTES = 15;
+
+    /** Store a new transaction password and clear any lock. */
+    public static function setTxnPassword(int $userId, string $plain): void
+    {
+        Database::run(
+            'UPDATE users SET txn_password_hash = ?, txn_fails = 0, txn_locked_until = NULL WHERE id = ?',
+            [password_hash($plain, PASSWORD_DEFAULT), $userId]
+        );
+    }
+
+    /**
+     * Check the transaction password before a withdrawal / P2P / transfer.
+     * 5 wrong tries lock it for 15 minutes.
+     *
+     * @throws \DomainException with a user-facing message
+     */
+    public static function verifyTxnPassword(int $userId, string $plain): void
+    {
+        $row = Database::one('SELECT txn_password_hash, txn_fails, txn_locked_until FROM users WHERE id = ?', [$userId]);
+        if ($row === null || empty($row['txn_password_hash'])) {
+            throw new \DomainException('Set your transaction password in Profile first.');
+        }
+        if ($row['txn_locked_until'] !== null && $row['txn_locked_until'] > now()) {
+            throw new \DomainException('Too many wrong attempts. Try again after ' . fmt_date($row['txn_locked_until'], 'H:i') . '.');
+        }
+        if ($plain === '' || !password_verify($plain, $row['txn_password_hash'])) {
+            $fails = (int) $row['txn_fails'] + 1;
+            if ($fails >= self::TXN_MAX_FAILS) {
+                Database::run(
+                    'UPDATE users SET txn_fails = 0, txn_locked_until = ? WHERE id = ?',
+                    [date('Y-m-d H:i:s', (int) strtotime(now() . ' +' . self::TXN_LOCK_MINUTES . ' minutes')), $userId]
+                );
+                throw new \DomainException('Too many wrong attempts. Locked for ' . self::TXN_LOCK_MINUTES . ' minutes.');
+            }
+            Database::run('UPDATE users SET txn_fails = ? WHERE id = ?', [$fails, $userId]);
+            throw new \DomainException('Wrong transaction password. ' . (self::TXN_MAX_FAILS - $fails) . ' attempt(s) left.');
+        }
+        if ((int) $row['txn_fails'] > 0 || $row['txn_locked_until'] !== null) {
+            Database::run('UPDATE users SET txn_fails = 0, txn_locked_until = NULL WHERE id = ?', [$userId]);
+        }
     }
 
     /**
@@ -194,7 +240,28 @@ final class User
         return $gotBonus ? max($min, Setting::num('min_invest_bonus')) : $min;
     }
 
-    /** Amount currently invested in running plans (the daily withdrawal limit). */
+
+    /**
+     * Daily withdrawal limit: the total of running plans. With no running plan it falls back to the
+     * plans that matured most recently (same maturity day), so a matured member is not stuck at $0.
+     * No investment ever = $0.
+     */
+    public static function withdrawLimit(int $userId): float
+    {
+        $active = self::activeInvestment($userId);
+        if ($active > 0) {
+            return $active;
+        }
+        return (float) Database::value(
+            "SELECT COALESCE(SUM(amount), 0) FROM investments WHERE user_id = ? AND status = 'Matured'
+               AND DATE(matured_at) = (SELECT MAX(DATE(matured_at)) FROM investments WHERE user_id = ? AND status = 'Matured')",
+            [$userId, $userId]
+        );
+    }
+
+    /** Amount currently invested in running plans. */
+
+
     public static function activeInvestment(int $userId): float
     {
         return (float) Database::value(

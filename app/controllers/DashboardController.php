@@ -27,7 +27,6 @@ final class DashboardController
         $user = Auth::user();
         $userId = (int) $user['id'];
         $summary = Investment::summary($userId);
-        $earningTypes = array_merge(Ledger::INCOME_TYPES, ['profit']);
 
         view('dashboard', [
             'title' => 'Dashboard',
@@ -38,9 +37,8 @@ final class DashboardController
                 ['label' => 'Deposit Wallet', 'value' => money($user['deposit_balance']), 'tone' => 'muted'],
                 ['label' => 'ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green'],
                 ['label' => 'Income Wallet', 'value' => money($user['income_balance']), 'tone' => 'amber'],
-                ['label' => "Today's Earning", 'value' => money(Ledger::sum($userId, $earningTypes, today() . ' 00:00:00')), 'tone' => 'green'],
-                ['label' => 'Total Earning', 'value' => money(Ledger::sum($userId, $earningTypes)), 'tone' => 'cyan'],
             ],
+            'returns' => Ledger::returnCards($userId),
             'salary' => Salary::progress($user),
             'referral' => self::referralLink($user['user_code']),
             'terms' => PlanTerm::all(),

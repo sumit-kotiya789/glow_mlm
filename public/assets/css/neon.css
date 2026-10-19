@@ -73,6 +73,7 @@ table { border-collapse: collapse; }
 .text-gold, .is-gold { color: var(--neon); }
 .text-green, .is-green { color: var(--neon); }
 .text-red, .is-red { color: var(--red); }
+.is-cyan { color: var(--neon-2); }
 .text-cyan { color: var(--neon-2); }
 .text-muted { color: var(--muted); }
 .num { font-variant-numeric: tabular-nums; }
@@ -294,6 +295,9 @@ textarea.input { resize: vertical; }
 .stat-card::after { content: ''; position: absolute; right: -30px; top: -30px; width: 100px; height: 100px; background: radial-gradient(closest-side, var(--tone-soft, transparent), transparent); }
 .stat-card__label { position: relative; z-index: 1; font-size: 10.5px; font-weight: 600; line-height: 1.3; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
 .stat-card__value { position: relative; z-index: 1; font-size: 23px; font-weight: 700; line-height: 1.1; color: var(--text); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.stat-card__hint { position: relative; z-index: 1; margin: 0; font-size: 11px; line-height: 1.3; color: var(--muted); }
+.stat-grid--returns .stat-card:last-child { grid-column: 1 / -1; }
+.inline-form .input--full { grid-column: 1 / -1; }
 .stat-card--gold { --tone: var(--neon); --tone-soft: rgba(45, 255, 154, .22); background: linear-gradient(135deg, rgba(45, 255, 154, .14), rgba(25, 227, 208, .04)), var(--surface); border-color: var(--neon-line); }
 .stat-card--gold .stat-card__value { color: var(--neon); text-shadow: 0 0 20px rgba(45, 255, 154, .5); }
 .stat-card--green { --tone: #5dffb0; --tone-soft: rgba(93, 255, 176, .14); }
@@ -631,6 +635,7 @@ body.guest { background: var(--bg); }
     :root { --gutter: 28px; }
     .card--pad { padding: 24px; }
     .stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .stat-grid--returns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .stat-grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .term-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

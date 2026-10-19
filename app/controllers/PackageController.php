@@ -77,6 +77,7 @@ final class PackageController
             if (!preg_match('/^\d{1,7}(\.\d{1,2})?$/', $raw)) {
                 throw new DomainException('Enter a valid amount (up to 2 decimals).');
             }
+            User::verifyTxnPassword((int) Auth::id(), password_input('txn_password'));
             $id = Withdrawal::request((int) Auth::id(), 'plan', (float) $raw, (int) input('id'));
             toast('Withdrawal #' . $id . ' requested: ' . money($raw) . '. Admin will process it.');
         } catch (DomainException $e) {

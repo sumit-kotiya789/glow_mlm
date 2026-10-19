@@ -55,6 +55,7 @@ final class AuthController
             'mobile' => preg_replace('/[\s-]/', '', input('mobile')),
             'wallet' => input('wallet'),
             'password' => (string) ($_POST['password'] ?? ''),
+            'txn_password' => password_input('txn_password'),
         ];
 
         $errors = [];
@@ -81,6 +82,11 @@ final class AuthController
         }
         if (strlen($data['password']) < 8) {
             $errors['password'] = 'Password must be at least 8 characters.';
+        }
+        if (strlen($data['txn_password']) < 6 || strlen($data['txn_password']) > 64) {
+            $errors['txn_password'] = 'Transaction password must be 6-64 characters.';
+        } elseif ($data['txn_password'] === $data['password']) {
+            $errors['txn_password'] = 'Transaction password must be different from your login password.';
         }
         if (empty($_POST['terms'])) {
             $errors['terms'] = 'Please accept the terms of service.';

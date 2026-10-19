@@ -22,6 +22,8 @@ $fields = [
     ]],
     ['password', 'Set Login Password *', 'password', ['minlength' => 8, 'autocomplete' => 'new-password',
         'data-invalid' => 'Password must be at least 8 characters.']],
+    ['txn_password', 'Set Transaction Password * (withdraw / transfer)', 'password', ['minlength' => 6, 'maxlength' => 64, 'autocomplete' => 'new-password',
+        'data-invalid' => 'Transaction password must be at least 6 characters.']],
 ];
 $sponsorDefault = isset($_GET['ref']) && is_string($_GET['ref']) ? strtoupper($_GET['ref']) : 'GL0000001';
 ?>

@@ -22,8 +22,8 @@
                 <tr>
                 <?php foreach ($columns as $key => $label) :
                     $cell = $row[$key] ?? '';
-                    [$text, $class, $href] = is_array($cell) ? $cell + [1 => '', 2 => null] : [$cell, '', null]; ?>
-                    <td data-label="<?= e($label) ?>"<?= $class ? ' class="' . e($class) . '"' : '' ?>><?php if ($href) : ?><a class="link-cell" href="<?= e($href) ?>"><?= e($text) ?></a><?php else : ?><?= e($text) ?><?php endif ?></td>
+                    [$text, $class, $href, $external] = is_array($cell) ? $cell + [1 => '', 2 => null, 3 => false] : [$cell, '', null, false]; ?>
+                    <td data-label="<?= e($label) ?>"<?= $class ? ' class="' . e($class) . '"' : '' ?>><?php if ($href) : ?><a class="link-cell" href="<?= e($href) ?>"<?= $external ? ' target="_blank" rel="noopener noreferrer"' : '' ?>><?= e($text) ?></a><?php else : ?><?= e($text) ?><?php endif ?></td>
                 <?php endforeach ?>
                 </tr>
             <?php endforeach ?>

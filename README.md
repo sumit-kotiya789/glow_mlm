@@ -22,31 +22,33 @@ php -S localhost:8000 -t public      # open http://localhost:8000
 
 XAMPP / Apache alternative: `http://localhost/MLM/GLOW/public/` (needs `mod_rewrite`).
 
+**Upgrading an existing database** (keeps your data): `php db/migrate_txn_password.php` adds the transaction-password columns once.
+
 ## Demo logins
 
-| Who    | Login       | Password    |
-|--------|-------------|-------------|
-| Member | `GL0000001` | `demo1234`  |
+| Who    | Login       | Password                                  |
+| ------ | ----------- | ----------------------------------------- |
+| Member | `GL0000001` | `demo1234`                                |
 | Admin  | `admin`     | `admin1234` → http://localhost:8000/admin |
 
-Every seeded member (`GL0000101`…) uses `demo1234`. The seeder builds a 35-member tree over 10 levels (plus 100 extra investors at levels 3-4) by running
+Every seeded member (`GL0000101`…) uses `demo1234`. **Transaction password** (withdrawal, P2P, transfer) for every seeded member is `txn1234`; members set or change it under Profile. The seeder builds a 35-member tree over 10 levels (plus 100 extra investors at levels 3-4) by running
 the real engine: approved deposits, investments, 4 days of payouts, one lucky draw, and some pending
 deposits/withdrawals for the admin. Today's payout is left due.
 
 Test accounts (also printed by `php db/seed.php`):
 
-| Account | Ready to test |
-|---------|---------------|
-| `GL0000001` | Salary at 5/5 directs, 8/10 level-2; pending $50 deposit (no bonus) and $2 ROI withdrawal; 2 tickets |
-| `GL0000002` | Maturity Tester (no sponsor): compound + FD at day 24/25. **Run Due Payouts** matures both, then limit $0 |
+| Account                  | Ready to test                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `GL0000001`              | Salary at 5/5 directs, 8/10 level-2; pending $50 deposit (no bonus) and $2 ROI withdrawal; 2 tickets             |
+| `GL0000002`              | Maturity Tester (no sponsor): compound + FD at day 24/25. **Run Due Payouts** matures both, then limit $0        |
 | `GL0000209`, `GL0000210` | $100 in Deposit wallet. Invest with both and GL0000001 qualifies; set salary pay day to tomorrow, **+1** pays it |
-| `GL0000101` | Compound plan, 4 days pending; pending $5 income and $8 plan withdrawals (reject refunds the plan) |
-| `GL0000106` | First deposit pending (approve pays $5 signup bonus), one rejected |
-| `GL0000211` | Registered, never deposited |
-| `GL0000212` | Blocked |
-| `GL0000203` | Salary achiever (12 active directs, 10 active level-2), shown with a trophy in the Level Team tree |
-| `GL0000401`…`GL0000500` | Extra active investors (level 3-4 of GL0000001), so a 10 + 90 lucky draw fills |
-| Admin | Weekly Lucky Draw #2 draft (100 slots, 131 eligible), 1 open ticket |
+| `GL0000101`              | Compound plan, 4 days pending; pending $5 income and $8 plan withdrawals (reject refunds the plan)               |
+| `GL0000106`              | First deposit pending (approve pays $5 signup bonus), one rejected                                               |
+| `GL0000211`              | Registered, never deposited                                                                                      |
+| `GL0000212`              | Blocked                                                                                                          |
+| `GL0000203`              | Salary achiever (12 active directs, 10 active level-2), shown with a trophy in the Level Team tree               |
+| `GL0000401`…`GL0000500`  | Extra active investors (level 3-4 of GL0000001), so a 10 + 90 lucky draw fills                                   |
+| Admin                    | Weekly Lucky Draw #2 draft (100 slots, 131 eligible), 1 open ticket                                              |
 
 ## Payout (daily, or hourly for testing)
 
@@ -105,17 +107,17 @@ public/
 
 Separate login (own session key, so admin and member can be logged in together). Sidebar docks on desktop.
 
-| Page | What the admin does |
-|------|---------------------|
-| Dashboard | Totals, pending queues, **Run Due Payouts**, testing buttons **+1 / +5 / +25** days (or hours) |
-| Deposits | Approve (credits Deposit wallet, pays signup bonus on first deposit) or reject with reason |
-| Withdrawals | Send manually, then **Mark Paid** (optional payout hash) or reject (refunds the source) |
-| Ledger | Every wallet movement, filter by type or `?user=GL…` |
-| Users | Search, member detail (wallets, salary progress, uplines, team per level, plans, ledger), block/unblock, manual wallet adjustment (logged) |
-| Investments | All plans, Active / Matured |
-| Lucky Draws | Create, hand-pick favourites by search, fill the rest at random (active investors only), distribute |
-| Tickets | Reply; the member sees it on their Support page |
-| Settings | Every number from docs/RULES.md + plan terms (days and rates per term) |
+| Page        | What the admin does                                                                                                                        |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dashboard   | Totals, pending queues, **Run Due Payouts**, testing buttons **+1 / +5 / +25** days (or hours)                                             |
+| Deposits    | Approve (credits Deposit wallet, pays signup bonus on first deposit) or reject with reason                                                 |
+| Withdrawals | Send manually, then **Mark Paid** (optional payout hash) or reject (refunds the source)                                                    |
+| Ledger      | Every wallet movement, filter by type or `?user=GL…`                                                                                       |
+| Users       | Search, member detail (wallets, salary progress, uplines, team per level, plans, ledger), block/unblock, manual wallet adjustment (logged) |
+| Investments | All plans, Active / Matured                                                                                                                |
+| Lucky Draws | Create, hand-pick favourites by search, fill the rest at random (active investors only), distribute                                        |
+| Tickets     | Reply; the member sees it on their Support page                                                                                            |
+| Settings    | Every number from docs/RULES.md + plan terms (days and rates per term)                                                                     |
 
 ## Switching to SQLite (no MySQL needed)
 

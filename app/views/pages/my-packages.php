@@ -94,6 +94,11 @@ $back = $compoundOnly ? '/compound-packages' : '/my-packages';
                                 aria-describedby="err-w-<?= e($p['id']) ?>"
                                 data-invalid="Enter $1.00 to <?= e(money($p['pending'])) ?>." <?= (float) $p['pending'] >= 1 ? '' : ' disabled' ?>>
                             <button class="btn btn--ghost" type="submit" <?= (float) $p['pending'] >= 1 ? '' : ' disabled' ?>>Withdraw</button>
+                            <label class="sr-only" for="wt-<?= e($p['id']) ?>">Transaction password</label>
+                            <input class="input input--full" id="wt-<?= e($p['id']) ?>" name="txn_password" type="password" required
+                                maxlength="64" autocomplete="off" placeholder="Transaction password"
+                                aria-describedby="err-w-<?= e($p['id']) ?>" data-required="Enter your transaction password."
+                                <?= (float) $p['pending'] >= 1 ? '' : ' disabled' ?>>
                             <p class="field-error" id="err-w-<?= e($p['id']) ?>"></p>
                         </form>
                     </div>

@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Auth;
 use App\Database;
 use App\Models\Deposit;
+use App\Models\Investment;
 use App\Models\Ledger;
 use App\Models\Setting;
 use App\Models\Transfer;
@@ -47,12 +48,14 @@ final class WalletController
                 ['label' => 'Income Wallet', 'value' => money($user['income_balance']), 'tone' => 'gold'],
                 ['label' => 'Total', 'value' => money($user['deposit_balance'] + $user['roi_balance'] + $user['income_balance']), 'tone' => 'muted'],
             ],
+            'returns' => in_array($wallet, ['all', 'roi'], true) ? Ledger::returnCards((int) $user['id']) : [],
             'tabs' => filter_tabs('/wallet', $tabs, $wallet, 'wallet'),
-            'columns' => ['date' => 'Date', 'wallet' => 'Wallet', 'type' => 'Type', 'note' => 'Detail', 'amount' => 'Amount'],
+            'columns' => ['date' => 'Date', 'wallet' => 'Wallet', 'type' => 'Type', 'plan' => 'Plan', 'note' => 'Detail', 'amount' => 'Amount'],
             'rows' => array_map(static fn($r) => [
                 'date' => fmt_date($r['created_at'], 'd-M-Y H:i'),
                 'wallet' => $tabs[$r['wallet']],
                 'type' => Ledger::TYPES[$r['type']] ?? $r['type'],
+                'plan' => ($r['plan'] ?? null) !== null ? [Investment::PLANS[$r['plan']] ?? $r['plan'], $r['plan'] === 'fixed' ? 'is-cyan' : 'is-green'] : '—',
                 'note' => $r['from_code'] && $r['level'] !== null ? $r['from_code'] . ' · L' . $r['level'] : ($r['note'] ?: '—'),
                 'amount' => $r['amount'] >= 0
                     ? ['+' . money($r['amount']), 'num is-green']
@@ -105,7 +108,7 @@ final class WalletController
             'heading' => 'Deposit History',
             'subtitle' => 'Your USDT deposit requests.',
             'icon' => 'history',
-            'columns' => ['date' => 'Date', 'hash' => 'Tx Hash', 'amount' => 'Amount', 'status' => 'Status', 'note' => 'Note'],
+            'columns' => ['date' => 'Date', 'hash' => 'Tx Hash', 'bsc' => 'Verify in BSC', 'amount' => 'Amount', 'status' => 'Status', 'note' => 'Note'],
             'rows' => $this->depositRows($pager['rows']),
             'pager' => $pager,
             'empty' => 'No deposits yet',
@@ -115,7 +118,7 @@ final class WalletController
     public function withdrawal(): void
     {
         $user = Auth::user();
-        $limit = User::activeInvestment((int) $user['id']);
+        $limit = User::withdrawLimit((int) $user['id']);
         $used = Withdrawal::todayTotal((int) $user['id']);
         view('withdrawal', [
             'title' => 'Withdrawal',
@@ -139,6 +142,13 @@ final class WalletController
         }
         if (!preg_match('/^\d{1,7}(\.\d{1,2})?$/', $raw)) {
             $errors['amount'] = 'Enter a valid amount (up to 2 decimals).';
+        }
+        if (!$errors) {
+            try {
+                User::verifyTxnPassword((int) Auth::id(), password_input('txn_password'));
+            } catch (DomainException $e) {
+                $errors['txn_password'] = $e->getMessage();
+            }
         }
         if (!$errors) {
             try {
@@ -170,6 +180,7 @@ final class WalletController
                 'fee' => 'Fee',
                 'net' => 'You Get',
                 'status' => 'Status',
+                'bsc' => 'Verify in BSC',
                 'note' => 'Note',
             ],
             'rows' => $this->withdrawalRows($pager['rows']),
@@ -204,6 +215,13 @@ final class WalletController
         }
         if (!$errors) {
             try {
+                User::verifyTxnPassword((int) Auth::id(), password_input('txn_password'));
+            } catch (DomainException $e) {
+                $errors['p2p_txn_password'] = $e->getMessage();
+            }
+        }
+        if (!$errors) {
+            try {
                 $to = Transfer::p2p((int) Auth::id(), $code, (float) $raw);
             } catch (DomainException $e) {
                 $errors[$e->getCode() === 1 ? 'user_code' : 'p2p_amount'] = $e->getMessage();
@@ -227,6 +245,13 @@ final class WalletController
         }
         if (!preg_match('/^\d{1,7}(\.\d{1,2})?$/', $raw)) {
             $errors['move_amount'] = 'Enter a valid amount (up to 2 decimals).';
+        }
+        if (!$errors) {
+            try {
+                User::verifyTxnPassword((int) Auth::id(), password_input('txn_password'));
+            } catch (DomainException $e) {
+                $errors['move_txn_password'] = $e->getMessage();
+            }
         }
         if (!$errors) {
             try {
@@ -329,6 +354,7 @@ final class WalletController
         return array_map(static fn($d) => [
             'date' => fmt_date($d['created_at'], 'd-M-Y H:i'),
             'hash' => substr($d['tx_hash'], 0, 10) . '…' . substr($d['tx_hash'], -6),
+            'bsc' => bscscan_cell($d['tx_hash']),
             'amount' => [money($d['amount']), 'num'],
             'status' => [$d['status'], status_class($d['status'])],
             'note' => $d['admin_note'] ?? '—',
@@ -344,6 +370,7 @@ final class WalletController
             'fee' => [money($w['fee']), 'num'],
             'net' => [money($w['net_amount']), 'num is-gold'],
             'status' => [$w['status'], status_class($w['status'])],
+            'bsc' => bscscan_cell($w['payout_hash'] ?? null),
             'note' => $w['admin_note'] ?? '—',
         ], $rows);
     }

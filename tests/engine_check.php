@@ -14,6 +14,7 @@ require APP_ROOT . '/db/seed.php';
 use App\Database;
 use App\Models\Deposit;
 use App\Models\Investment;
+use App\Models\Ledger;
 use App\Models\LuckyDraw;
 use App\Models\Setting;
 use App\Models\Transfer;
@@ -54,7 +55,7 @@ function member(string $code, ?int $sponsor): int
 {
     $n = (int) substr($code, 2);
     User::create(['user_code' => $code, 'name' => $code, 'email' => "$code@example.com", 'mobile' => sprintf('+1000000%04d', $n),
-        'country' => 'India', 'wallet' => sprintf('0x%040x', $n), 'password' => 'demo1234'], $sponsor);
+        'country' => 'India', 'wallet' => sprintf('0x%040x', $n), 'password' => 'demo1234', 'txn_password' => 'txn1234'], $sponsor);
     return (int) User::findByCode($code)['id'];
 }
 function fund(int $userId, float $amount): void
@@ -282,6 +283,60 @@ check('bonus still locked', 5.0, Transfer::lockedBonus($s));
 Database::run('UPDATE users SET deposit_balance = deposit_balance + 100 WHERE id = ?', [$s]);
 Investment::open($s, 'compound', 25, 10);       // investing spends the bonus first
 check('bonus unlocked after investing >= bonus', 0.0, Transfer::lockedBonus($s));
+
+echo "-- Transaction password\n";
+$t = member('GL0000014', null);
+User::verifyTxnPassword($t, 'txn1234');
+check('right password passes', true, true);
+throws('wrong password', fn () => User::verifyTxnPassword($t, 'nope'));
+throws('empty password', fn () => User::verifyTxnPassword($t, ''));
+throws('login password is not the transaction password', fn () => User::verifyTxnPassword($t, 'demo1234'));
+throws('4th wrong try', fn () => User::verifyTxnPassword($t, 'x4'));
+throws('5th wrong try locks', fn () => User::verifyTxnPassword($t, 'x5'));
+throws('locked: even the right password fails', fn () => User::verifyTxnPassword($t, 'txn1234'));
+$previousClock = freeze_clock(date('Y-m-d H:i:s', strtotime(now() . ' +20 minutes')));
+User::verifyTxnPassword($t, 'txn1234');
+check('unlocked after 15 minutes', 0, (int) Database::value('SELECT txn_fails FROM users WHERE id = ?', [$t]));
+freeze_clock($previousClock);
+User::setTxnPassword($t, 'new-secret');
+throws('old password after change', fn () => User::verifyTxnPassword($t, 'txn1234'));
+User::verifyTxnPassword($t, 'new-secret');
+$noTxn = member('GL0000015', null);
+Database::run('UPDATE users SET txn_password_hash = NULL WHERE id = ?', [$noTxn]);
+throws('no transaction password set yet', fn () => User::verifyTxnPassword($noTxn, 'anything'));
+
+echo "-- Daily withdrawal limit after maturity\n";
+$m = member('GL0000017', null);
+check('never invested = limit 0', 0.0, User::withdrawLimit($m));
+Database::run('UPDATE users SET deposit_balance = 500 WHERE id = ?', [$m]);
+$m1 = Investment::open($m, 'fixed', 25, 100);
+$m2 = Investment::open($m, 'compound', 25, 50);
+check('running plans = limit', 150.0, User::withdrawLimit($m));
+Database::run("UPDATE investments SET status = 'Matured', matured_at = '2026-03-01 00:00:00' WHERE id IN (?, ?)", [$m1, $m2]);
+check('matured: limit stays at the last matured plans', 150.0, User::withdrawLimit($m));
+$m3 = Investment::open($m, 'compound', 25, 20);
+check('a new running plan takes over', 20.0, User::withdrawLimit($m));
+
+echo "-- ROI returns split (Fixed / Compound)\n";
+$u = member('GL0000016', null);
+Database::run('UPDATE users SET deposit_balance = 100 WHERE id = ?', [$u]);
+$cid = Investment::open($u, 'compound', 25, 10);
+$fid = Investment::open($u, 'fixed', 25, 10);
+Ledger::post($u, 'roi', 'profit', 0.1, ['ref_id' => $cid]);
+Ledger::post($u, 'roi', 'profit', 0.1, ['ref_id' => $cid]);
+Ledger::post($u, 'roi', 'maturity', 20.0, ['ref_id' => $cid]);
+Ledger::post($u, 'roi', 'maturity', 22.5, ['ref_id' => $fid]);
+$split = Ledger::roiReturns($u);
+check('compound returns = profit + maturity', 20.2, $split['compound']);
+check('fixed returns = maturity incl. principal', 22.5, $split['fixed']);
+Ledger::post($u, 'income', 'direct', 3.0);
+$cards = Ledger::returnCards($u);
+check('3 boxes', 3, count($cards));
+check('combined = fixed + compound + income wallet', '$45.70', $cards[2]['value']);
+
+check('BscScan link for a valid hash', 'https://bscscan.com/tx/0x' . str_repeat('a', 64), bscscan_cell('0x' . str_repeat('a', 64))[2]);
+check('no BscScan link without a hash', '—', bscscan_cell(null));
+check('no BscScan link for a bad hash', '—', bscscan_cell('0x123'));
 
 echo $failures ? "\n$failures FAILED\n" : "\nALL PASSED\n";
 exit($failures ? 1 : 0);

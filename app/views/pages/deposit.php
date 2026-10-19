@@ -54,7 +54,7 @@ use App\Csrf;
         <a class="link-gold" href="<?= e(url('/deposit-history')) ?>">View all</a>
     </div>
     <?php partial('data-table', [
-        'columns' => ['date' => 'Date', 'hash' => 'Tx Hash', 'amount' => 'Amount', 'status' => 'Status', 'note' => 'Note'],
+        'columns' => ['date' => 'Date', 'hash' => 'Tx Hash', 'bsc' => 'Verify in BSC', 'amount' => 'Amount', 'status' => 'Status', 'note' => 'Note'],
         'rows' => $recent,
         'empty' => 'No deposits yet',
     ]) ?>

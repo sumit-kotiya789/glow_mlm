@@ -150,9 +150,36 @@ function invalid_attr(string $key): string
 function fail(string $path, array $errors): never
 {
     flash('errors', $errors);
-    flash('old', array_diff_key($_POST, array_flip(['password', '_csrf'])));
+    flash('old', array_filter(
+        $_POST,
+        static fn ($key) => $key !== '_csrf' && !str_contains((string) $key, 'password'),
+        ARRAY_FILTER_USE_KEY
+    ));
     toast('Please fix the highlighted fields.', 'error');
     redirect($path);
+}
+
+/** True when the logged-in member has set a transaction password. */
+function has_txn_password(): bool
+{
+    $user = \App\Auth::user();
+    return $user !== null && !empty($user['txn_password_hash']);
+}
+
+/** Raw (untrimmed) password-type POST field. */
+function password_input(string $key): string
+{
+    $value = $_POST[$key] ?? '';
+    return is_string($value) ? $value : '';
+}
+
+/** Data-table cell linking a BSC transaction hash to BscScan (opens in a new tab), or a dash. */
+function bscscan_cell(?string $hash): string|array
+{
+    if ($hash === null || !preg_match('/^0x[a-fA-F0-9]{64}$/', $hash)) {
+        return '—';
+    }
+    return ['Verify ↗', 'link-cell', 'https://bscscan.com/tx/' . $hash, true];
 }
 
 function input(string $key): string

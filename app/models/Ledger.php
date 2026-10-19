@@ -103,8 +103,10 @@ final class Ledger
     {
         $wallets = $wallet === null ? array_keys(self::BALANCE_COLUMNS) : [$wallet];
         return Database::paginate(
-            'SELECT l.*, f.user_code AS from_code FROM ledger l LEFT JOIN users f ON f.id = l.from_user_id
-             WHERE l.user_id = ? AND l.wallet IN (' . Database::placeholders($wallets) . ')
+            "SELECT l.*, f.user_code AS from_code, i.plan AS plan FROM ledger l
+             LEFT JOIN users f ON f.id = l.from_user_id
+             LEFT JOIN investments i ON i.id = l.ref_id AND l.type IN ('profit', 'maturity')
+             WHERE l.user_id = ? AND l.wallet IN (" . Database::placeholders($wallets) . ')
              ORDER BY l.id DESC',
             array_merge([$userId], $wallets),
             $page
@@ -148,6 +150,58 @@ final class Ledger
             $params[] = $since;
         }
         return (float) Database::value($sql, $params);
+    }
+
+    /**
+     * Everything the ROI wallet received from plans, split by plan type (display only, reads the ledger):
+     * Compound = daily profit + maturity payout, Fixed = maturity payout (principal + locked ROI).
+     * A rejected plan withdrawal refunded to ROI after the plan matured counts for its plan too.
+     *
+     * @return array{fixed: float, compound: float}
+     */
+    public static function roiReturns(int $userId): array
+    {
+        $totals = ['fixed' => 0.0, 'compound' => 0.0];
+        $rows = array_merge(
+            Database::all(
+                "SELECT i.plan, SUM(l.amount) AS total FROM ledger l JOIN investments i ON i.id = l.ref_id
+                 WHERE l.user_id = ? AND l.wallet = 'roi' AND l.type IN ('profit', 'maturity') GROUP BY i.plan",
+                [$userId]
+            ),
+            Database::all(
+                "SELECT i.plan, SUM(l.amount) AS total FROM ledger l
+                 JOIN withdrawals w ON w.id = l.ref_id AND w.source = 'plan'
+                 JOIN investments i ON i.id = w.investment_id
+                 WHERE l.user_id = ? AND l.wallet = 'roi' AND l.type = 'refund' GROUP BY i.plan",
+                [$userId]
+            )
+        );
+        foreach ($rows as $row) {
+            if (isset($totals[$row['plan']])) {
+                $totals[$row['plan']] += (float) $row['total'];
+            }
+        }
+        return $totals;
+    }
+
+    /**
+     * The three boxes: Fixed returns, Compound returns, All income combined.
+     *
+     * @return list<array{label: string, value: string, tone: string, hint: string}>
+     */
+    public static function returnCards(int $userId): array
+    {
+        $roi = self::roiReturns($userId);
+        $income = self::sum($userId, self::INCOME_TYPES);
+        $locked = Investment::summary($userId)['locked'];
+        return [
+            ['label' => 'Fixed Returns', 'value' => money($roi['fixed']), 'tone' => 'cyan',
+                'hint' => 'Matured Fixed plans · locked now ' . money($locked)],
+            ['label' => 'Compound Returns', 'value' => money($roi['compound']), 'tone' => 'green',
+                'hint' => 'Daily profit + matured Compound plans'],
+            ['label' => 'All Income Combined', 'value' => money($roi['fixed'] + $roi['compound'] + $income), 'tone' => 'gold',
+                'hint' => 'Fixed + Compound + Income wallet earnings'],
+        ];
     }
 
     /** @return array<string, float> income type => total */

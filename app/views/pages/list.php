@@ -22,6 +22,14 @@
     </section>
 <?php endif ?>
 
+<?php if (!empty($returns)) : ?>
+    <section class="stat-grid stat-grid--returns" aria-label="ROI returns by plan type">
+        <?php foreach ($returns as $card) {
+            partial('stat-card', $card);
+        } ?>
+    </section>
+<?php endif ?>
+
 <?php if (!empty($tree)) {
     partial('team-tree', ['tree' => $tree]);
 } ?>

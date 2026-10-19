@@ -29,10 +29,10 @@ final class Withdrawal
         if ($amount < $min || $amount > $max) {
             throw new DomainException('Amount must be ' . money($min) . ' to ' . money($max) . ' per request.');
         }
-        $limit = User::activeInvestment($userId);
+        $limit = User::withdrawLimit($userId);
         $used = self::todayTotal($userId);
         if ($used + $amount > $limit + 0.001) {
-            throw new DomainException('Daily limit is ' . money($limit) . ' (your active investment). Left today: '
+            throw new DomainException('Daily limit is ' . money($limit) . ' (your investment).) Left today: '
                 . money(max(0, $limit - $used)) . '.');
         }
         $user = User::find($userId);

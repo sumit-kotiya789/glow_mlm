@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="viewport" content="width=device-width,initial-scale=1"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><style>body{margin:0;background:#0a1020}a{color:#d4af37;text-decoration:none}a:hover{color:#f0e0a0}input::placeholder,textarea::placeholder{color:#8a93a8}select:invalid{color:#8a93a8}*{-webkit-tap-highlight-color:transparent}@keyframes wfIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes wfPulse{0%,100%{opacity:1}50%{opacity:.45}}::-webkit-scrollbar{height:6px;width:6px}::-webkit-scrollbar-thumb{background:rgba(212,175,55,.35);border-radius:6px}</style></helmet>
+<div style="min-height:100vh;font-family:'Poppins',system-ui,sans-serif;background:{{ pageBg }};position:relative;color:#fff">
+
+<sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh;box-sizing:border-box;background:radial-gradient(ellipse at 20% 0%,#0d2a5c 0%,transparent 55%),radial-gradient(ellipse at 80% 100%,#0a3a5a 0%,transparent 50%),#050b1c;display:flex;align-items:center;justify-content:center;padding:64px 18px 40px;position:relative;overflow:hidden">
+<div style="position:absolute;top:14%;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#d4af37 45%,transparent);box-shadow:0 0 24px 2px rgba(212,175,55,.5)"></div>
+<div style="position:absolute;bottom:22%;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.6) 50%,transparent)"></div>
+<div style="position:absolute;inset:0;background-image:radial-gradient(circle,rgba(130,175,255,.4) 1.3px,transparent 1.8px);background-size:52px 52px;-webkit-mask-image:linear-gradient(180deg,#000,transparent 70%);mask-image:linear-gradient(180deg,#000,transparent 70%)"></div>
+<div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:600;letter-spacing:.14em;color:#0a1020;background:#d4af37;padding:4px 12px;border-radius:99px">DEMO DATA</div>
+<div style="position:relative;width:min(100%,440px);background:rgba(38,42,50,.9);border:1px solid rgba(255,255,255,.12);border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55);backdrop-filter:blur(14px);padding:26px 30px 26px;box-sizing:border-box;animation:wfIn .4s">
+<div style="position:absolute;top:0;left:0;right:0;height:150px;background:linear-gradient(135deg,#0f95b5,#07688a);clip-path:polygon(0 0,100% 0,100% 62%,0 100%)"></div>
+<div style="position:relative;display:inline-flex;flex-direction:column;align-items:center;background:#fff;border-radius:10px;padding:10px 12px 8px;box-shadow:0 6px 18px rgba(0,0,0,.3)">
+<div style="font-family:'Cormorant Garamond',serif;font-weight:700;font-size:34px;letter-spacing:.03em;color:#13265c;line-height:1">W<span style="display:inline-block;width:28px;height:28px;border:2.5px solid #d4af37;border-radius:50%;box-sizing:border-box;vertical-align:-3px;margin:0 1px;text-align:center;line-height:23px;font-size:28px;color:#13265c;transform:scale(1.02)">O</span>RLD</div>
+<div style="font-family:'Cormorant Garamond',serif;font-size:9px;letter-spacing:.5em;color:#b8962e;margin-top:3px;display:flex;align-items:center;gap:6px"><span style="width:18px;height:1px;background:#b8962e"></span>FINANCE<span style="width:18px;height:1px;background:#b8962e"></span></div>
+</div>
+
+<sc-if value="{{ isLogin }}">
+<form onSubmit="{{ doLogin }}" novalidate="novalidate" style="position:relative">
+<h1 style="font-weight:400;font-size:25px;text-align:center;margin:8px 0 14px">Sign Into Your Account</h1>
+<sc-for list="{{ loginFields }}" as="f" hint-placeholder-count="2">
+<div style="margin-top:6px">
+<input type="{{ f.type }}" placeholder="{{ f.ph }}" value="{{ f.val }}" onInput="{{ f.on }}" autocomplete="off" aria-label="{{ f.ph }}" style="width:100%;box-sizing:border-box;height:52px;background:transparent;border:0;border-bottom:1.5px solid {{ f.bc }};color:#fff;font:400 16px 'Poppins',sans-serif;padding:8px 10px;outline:none;letter-spacing:.04em" />
+<div style="color:#ff8a8a;font-size:12px;min-height:16px;padding:2px 10px">{{ f.err }}</div>
+</div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:4px">
+<label style="display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px;cursor:pointer"><input type="checkbox" checked="{{ rem }}" onChange="{{ toggleRem }}" style="width:22px;height:22px;accent-color:#00a8ff;margin:0" />Remember me</label>
+<a href="#/login" onClick="{{ forgot }}" style="color:#00a8ff;font-size:15px;min-height:44px;display:flex;align-items:center">Forgot Password?</a>
+</div>
+<button type="submit" style="width:100%;height:54px;margin-top:12px;border:0;border-radius:12px;background:linear-gradient(90deg,#00a8ff,#0583b5);color:#fff;font:500 17px 'Poppins',sans-serif;letter-spacing:.1em;cursor:pointer;box-shadow:0 0 26px rgba(0,168,255,.45)" style-hover="filter:brightness(1.12)">LOGIN NOW</button>
+<p style="text-align:center;font-size:15px;margin:18px 0 0">Don't have an account? <a href="#/register" style="color:#00a8ff">Register here</a></p>
+<p style="text-align:center;font-size:11px;color:#8a93a8;margin:10px 0 0">Demo: any User ID and password works.</p>
+</form>
+</sc-if>
+
+<sc-if value="{{ isRegister }}">
+<form onSubmit="{{ doRegister }}" novalidate="novalidate" style="position:relative">
+<h1 style="font-weight:400;font-size:25px;text-align:center;margin:8px 0 10px">Create An Account</h1>
+<sc-for list="{{ regFields }}" as="f" hint-placeholder-count="7">
+<div style="margin-top:2px">
+<sc-if value="{{ f.isSelect }}">
+<select required="required" value="{{ f.val }}" onChange="{{ f.on }}" aria-label="{{ f.ph }}" style="width:100%;box-sizing:border-box;height:52px;background:transparent;border:0;border-bottom:1.5px solid {{ f.bc }};color:{{ f.selColor }};font:400 16px 'Poppins',sans-serif;padding:8px 10px;outline:none">
+<option value="" style="color:#8a93a8;background:#262a32">{{ f.ph }}</option>
+<sc-for list="{{ countries }}" as="c"><option value="{{ c }}" style="color:#fff;background:#262a32">{{ c }}</option></sc-for>
+</select>
+</sc-if>
+<sc-if value="{{ f.isInput }}">
+<input type="{{ f.type }}" placeholder="{{ f.ph }}" value="{{ f.val }}" onInput="{{ f.on }}" autocomplete="off" aria-label="{{ f.ph }}" style="width:100%;box-sizing:border-box;height:52px;background:transparent;border:0;border-bottom:1.5px solid {{ f.bc }};color:#fff;font:400 16px 'Poppins',sans-serif;padding:8px 10px;outline:none" />
+</sc-if>
+<div style="color:#ff8a8a;font-size:12px;min-height:14px;padding:0 10px">{{ f.err }}</div>
+</div>
+</sc-for>
+<label style="display:flex;align-items:center;gap:10px;min-height:44px;font-size:15px;cursor:pointer;margin-top:4px"><input type="checkbox" checked="{{ terms }}" onChange="{{ toggleTerms }}" style="width:22px;height:22px;accent-color:#00a8ff;margin:0" />I agree to the terms of service</label>
+<div style="color:#ff8a8a;font-size:12px;min-height:14px;padding:0 2px">{{ termsErr }}</div>
+<button type="submit" style="width:100%;height:54px;margin-top:8px;border:0;border-radius:12px;background:linear-gradient(90deg,#00a8ff,#0583b5);color:#fff;font:500 17px 'Poppins',sans-serif;letter-spacing:.1em;cursor:pointer;box-shadow:0 0 26px rgba(0,168,255,.45)" style-hover="filter:brightness(1.12)">REGISTER NOW</button>
+<p style="text-align:center;font-size:15px;margin:18px 0 0">Already have an account? <a href="#/login" style="color:#00a8ff">Login here</a></p>
+</form>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+<header style="position:sticky;top:0;z-index:60;height:64px;background:#0a1020;border-bottom:1px solid rgba(212,175,55,.25);display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 20px;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;gap:3px"><a href="#/dashboard" style="color:#d4af37;font-weight:500;font-size:20px;letter-spacing:.04em;line-height:1">WORLD FINANCE</a><span style="align-self:flex-start;font-size:8.5px;font-weight:600;letter-spacing:.14em;color:#0a1020;background:#d4af37;padding:2px 8px;border-radius:99px">DEMO DATA</span></div>
+<div style="display:flex;align-items:center;gap:2px">
+<a href="#/login" aria-label="Log out" style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;color:#00a8ff"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></a>
+<button onClick="{{ toggleMenu }}" aria-label="Menu" style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;color:#d4af37;background:transparent;border:0;cursor:pointer"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="{{ menuD }}"/></svg></button>
+</div>
+</header>
+
+<div onClick="{{ closeMenu }}" style="position:fixed;top:64px;left:0;right:0;bottom:0;z-index:50;background:rgba(5,9,20,.55);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);opacity:{{ overlayOp }};pointer-events:{{ overlayPE }};transition:opacity .28s"></div>
+<nav style="position:fixed;top:64px;right:0;bottom:0;width:min(80%,320px);z-index:55;background:#141c33;border-left:1px solid rgba(212,175,55,.2);overflow-y:auto;padding:18px 0 40px;box-sizing:border-box;transform:translateX({{ navX }});transition:transform .3s cubic-bezier(.3,.8,.3,1);box-shadow:-16px 0 40px rgba(0,0,0,.35)">
+<sc-for list="{{ navItems }}" as="it" hint-placeholder-count="8">
+<sc-if value="{{ it.header }}"><div style="font-size:12px;letter-spacing:.14em;color:#8a93a8;padding:18px 22px 8px">{{ it.label }}</div></sc-if>
+<sc-if value="{{ it.isLink }}"><a href="{{ it.href }}" onClick="{{ closeMenu }}" style="display:flex;align-items:center;gap:16px;min-height:52px;margin:3px 12px 3px 0;padding:0 16px 0 18px;box-sizing:border-box;border-radius:0 14px 14px 0;font-size:16px;color:{{ it.color }};background:{{ it.bg }};border-left:4px solid {{ it.bar }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ it.d }}"/></svg>{{ it.label }}</a></sc-if>
+</sc-for>
+</nav>
+
+<main style="max-width:820px;margin:0 auto;padding:20px 18px 48px;box-sizing:border-box;animation:wfIn .35s">
+
+<sc-if value="{{ isDash }}">
+<div style="display:grid;grid-template-columns:1.1fr 1fr 1fr;background:#141c33;border:1px solid rgba(212,175,55,.25);border-radius:16px;padding:14px 10px;box-shadow:0 8px 24px rgba(0,0,0,.2);align-items:center">
+<div style="display:flex;align-items:center;gap:10px;padding-right:8px;min-width:0"><div style="flex:none;width:40px;height:40px;border-radius:12px;background:#1d2744;display:flex;align-items:center;justify-content:center;color:#d4af37"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></div><div style="min-width:0"><div style="font-size:10px;letter-spacing:.1em;color:#8a93a8">NAME</div><div style="font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Demo User</div></div></div>
+<div style="border-left:1px solid rgba(255,255,255,.1);padding:0 8px;min-width:0"><div style="font-size:10px;letter-spacing:.1em;color:#8a93a8">USER ID</div><div style="display:flex;align-items:center;gap:4px"><span style="color:#d4af37;font-size:14px;font-weight:500">WF0000001</span><button onClick="{{ copyId }}" aria-label="Copy user ID" style="width:32px;height:32px;background:transparent;border:0;color:#cbd2e1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h11v11H9zM5 15H4V4h11v1"/></svg></button></div></div>
+<div style="border-left:1px solid rgba(255,255,255,.1);padding:0 4px 0 12px"><div style="font-size:10px;letter-spacing:.1em;color:#8a93a8">JOINED</div><div style="font-size:14px;font-weight:500">09-Oct-2026</div></div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:14px">
+<sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
+<div style="background:{{ s.bg }};border:1px solid {{ s.bd }};border-radius:16px;padding:20px 16px;min-height:96px;box-sizing:border-box;box-shadow:0 8px 20px rgba(0,0,0,.18)"><div style="font-size:12px;letter-spacing:.06em;color:{{ s.lc }};font-weight:500">{{ s.label }}</div><div style="font-size:26px;font-weight:500;margin-top:10px;color:{{ s.vc }}">{{ s.value }}</div></div>
+</sc-for>
+</div>
+
+<section style="position:relative;overflow:hidden;margin-top:22px;background:#141c33;border:2px solid #d4af37;border-radius:18px;padding:22px 18px;box-shadow:0 10px 30px rgba(0,0,0,.25)">
+<svg width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;right:-6px;top:-14px;opacity:.14"><path d="M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg>
+<div style="position:relative">
+<h2 style="margin:0;color:#d4af37;font-size:28px;font-weight:500">MONTHLY SALARY</h2>
+<p style="margin:2px 0 18px;color:#aab2c5;font-size:15px">Earn $100 per month for 6 months! ($600 Total)</p>
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:17px"><span>Self Topup $50+</span><span style="color:#22c55e;display:flex"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11a10 10 0 1 1-5-8.7M9 11l3 3L22 4"/></svg></span></div>
+<sc-for list="{{ levels }}" as="l" hint-placeholder-count="2">
+<div style="margin-top:18px"><div style="display:flex;justify-content:space-between;font-size:15px;color:#cbd2e1"><span>{{ l.label }}</span><span style="color:#d4af37;font-weight:500">{{ l.prog }}</span></div><div style="height:10px;border-radius:9px;background:#1d2744;margin-top:8px;overflow:hidden"><div style="height:100%;width:{{ l.pct }};background:linear-gradient(90deg,#d4af37,#f0e0a0)"></div></div></div>
+</sc-for>
+<div style="margin-top:22px;border:1px solid #1f8fff;background:rgba(0,168,255,.12);border-radius:12px;min-height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;color:#4db8ff;font-size:16px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2"/></svg>Time Left: {{ countdown }} left</div>
+</div>
+</section>
+
+<section style="margin-top:22px;background:#141c33;border:1px solid rgba(212,175,55,.25);border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.22)">
+<div style="background:#0a1020;padding:18px 20px;color:#d4af37;font-size:18px;letter-spacing:.06em;border-bottom:1px solid rgba(212,175,55,.2)">REFERRAL LINK</div>
+<div style="padding:20px 18px;display:flex;align-items:stretch"><div style="flex:1;min-width:0;background:#070d1a;border:1px solid rgba(212,175,55,.25);border-right:0;border-radius:10px 0 0 10px;padding:0 14px;display:flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:13px;color:#d4af37;height:54px;overflow:hidden;white-space:nowrap">https://example.com/register?ref=WF0000001</div><button onClick="{{ copyRef }}" aria-label="Copy referral link" style="width:66px;border:0;border-radius:0 10px 10px 0;background:linear-gradient(90deg,#d4af37,#f0e0a0);color:#0a1020;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9h11v11H9zM5 15H4V4h11v1"/></svg></button></div>
+</section>
+
+<section style="margin-top:22px;background:#0f1628;border:1px solid rgba(212,175,55,.2);border-top:5px solid #d4af37;border-radius:18px;padding:22px 12px 8px;box-shadow:0 8px 24px rgba(0,0,0,.22)">
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px 6px">
+<sc-for list="{{ quick }}" as="q" hint-placeholder-count="8">
+<a href="{{ q.href }}" style="display:flex;flex-direction:column;align-items:center;gap:8px;color:#fff;font-size:13px;text-align:center;padding-bottom:16px;line-height:1.25" style-hover="color:#f0e0a0"><span style="width:64px;height:64px;border:1.5px solid rgba(212,175,55,.65);border-radius:22px;display:flex;align-items:center;justify-content:center;color:#d4af37;background:#111a30"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ q.d }}"/></svg></span>{{ q.label }}</a>
+</sc-for>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isDash }}">
+<h2 style="margin:36px 0 22px;font-size:30px;font-weight:400;color:#0f1a2e">Investment Packages</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px">
+<sc-for list="{{ packages }}" as="p" hint-placeholder-count="8">
+<div style="background:#0d1424;border:1px solid rgba(212,175,55,.3);border-radius:16px;padding:20px 18px;box-shadow:0 8px 20px rgba(0,0,0,.28)">
+<div style="color:#d4af37;font-size:19px;letter-spacing:.02em;margin-bottom:12px">{{ p.name }}</div>
+<div style="display:flex;justify-content:space-between;font-size:15px;line-height:1.75;color:#aab2c5"><span>Price:</span><span style="color:#22c55e">{{ p.price }}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:15px;line-height:1.75;color:#aab2c5"><span>Daily ROI:</span><span style="color:#22c55e">{{ p.roi }}</span></div>
+<div style="display:flex;justify-content:space-between;font-size:15px;line-height:1.75;color:#aab2c5"><span>Days:</span><span style="color:#fff">25</span></div>
+<div style="display:flex;justify-content:space-between;font-size:15px;color:#aab2c5;border-top:1px solid rgba(255,255,255,.14);margin-top:8px;padding-top:12px"><span>Total Profit:</span><span style="color:#d4af37">{{ p.total }}</span></div>
+<button onClick="{{ p.buy }}" style="width:100%;height:46px;margin-top:16px;border:0;border-radius:10px;background:linear-gradient(90deg,#d4af37,#f0e0a0);color:#0a1020;font:500 16px 'Poppins',sans-serif;cursor:pointer;box-shadow:0 0 16px rgba(212,175,55,.35)" style-hover="filter:brightness(1.08)">BUY NOW</button>
+</div>
+</sc-for>
+</div>
+<div style="height:34px"></div>
+</sc-if>
+
+<sc-if value="{{ isTitled }}">
+<h1 style="margin:4px 0 4px;font-size:24px;font-weight:500;letter-spacing:.03em;text-transform:uppercase">{{ title }}</h1>
+<p style="margin:0 0 20px;color:#8a93a8;font-size:14px">{{ sub }}</p>
+</sc-if>
+
+<sc-if value="{{ isProfile }}">
+<h2 style="margin:0 0 30px;color:#d4af37;font-size:28px;font-weight:500">My Profile Info</h2>
+<div style="border-top:1px solid rgba(255,255,255,.14)">
+<sc-for list="{{ profile }}" as="r" hint-placeholder-count="7">
+<div style="padding:20px 0 16px;border-bottom:1px solid rgba(255,255,255,.14)"><div style="font-size:18px;font-weight:500">{{ r.k }}</div><div style="margin-top:4px;font-size:17px;color:{{ r.c }};font-family:{{ r.f }};word-break:break-all">{{ r.v }}</div></div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showMyPk }}">
+<section style="background:#070d1a;border:1px solid rgba(212,175,55,.2);border-radius:20px;padding:22px 18px;box-shadow:0 10px 30px rgba(0,0,0,.3)">
+<div style="font-size:24px;font-weight:600;letter-spacing:.02em">MY PACKAGES</div>
+<div style="font-size:13px;letter-spacing:.1em;color:#8a93a8;margin:2px 0 14px">WORLD FINANCE</div>
+<sc-if value="{{ noOwned }}"><div style="border:1px dashed rgba(138,147,168,.4);border-radius:14px;min-height:96px;display:flex;align-items:center;justify-content:center;color:#8a93a8;letter-spacing:.12em;font-size:15px;text-align:center;padding:16px">NO ACTIVE PACKAGES FOUND</div></sc-if>
+<sc-for list="{{ owned }}" as="o">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:#111827;border:1px solid rgba(212,175,55,.25);border-radius:12px;padding:14px 16px;margin-top:10px"><div><div style="color:#d4af37;font-weight:500">{{ o.name }}</div><div style="font-size:12px;color:#8a93a8">Started {{ o.date }} · 25 days (demo)</div></div><div style="text-align:right"><div style="color:#22c55e;font-weight:500">{{ o.price }}</div><div style="font-size:12px;color:#8a93a8">{{ o.roi }}/day</div></div></div>
+</sc-for>
+</section>
+<div style="height:24px"></div>
+</sc-if>
+
+<sc-if value="{{ showTrading }}">
+<section style="background:#141c33;border:1px solid rgba(212,175,55,.2);border-top:6px solid #e0b019;border-radius:20px;padding:18px 0 8px;box-shadow:0 10px 30px rgba(0,0,0,.28);overflow:hidden">
+<div style="padding:0 16px"><div style="display:flex;align-items:center;gap:10px;color:#e0b019"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span style="font-size:25px;font-weight:500">AI Trading Status</span></div>
+<div style="font-size:12px;letter-spacing:.08em;color:#8a93a8;margin:8px 0 16px;font-family:'JetBrains Mono',monospace">{{ stamp }} · SAMPLE VALUES</div>
+<label style="display:flex;align-items:center;gap:10px;height:48px;background:#0a1020;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:0 14px;color:#8a93a8"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3"/></svg><input type="search" placeholder="Search Pair..." value="{{ q }}" onInput="{{ setQ }}" aria-label="Search pair" style="flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:400 16px 'Poppins',sans-serif" /></label></div>
+<div style="overflow-x:auto;margin-top:16px"><table style="border-collapse:collapse;width:100%;min-width:520px;font-size:14px">
+<thead><tr style="background:#1a2340;color:#aab2c5;font-size:13px;letter-spacing:.06em"><th style="text-align:left;padding:13px 16px;font-weight:400">PAIR</th><th style="text-align:left;padding:13px 8px;font-weight:400">SIDE</th><th style="text-align:left;padding:13px 8px;font-weight:400">ENTRY</th><th style="text-align:left;padding:13px 8px;font-weight:400">LATEST</th><th style="text-align:right;padding:13px 16px;font-weight:400">PNL</th></tr></thead>
+<tbody><sc-for list="{{ trades }}" as="t" hint-placeholder-count="6"><tr style="border-top:1px solid rgba(255,255,255,.07)"><td style="padding:13px 16px;font-weight:500;white-space:nowrap">{{ t.pair }}</td><td style="padding:13px 8px;color:{{ t.sc }};white-space:nowrap">{{ t.side }}</td><td style="padding:13px 8px;color:#dbe0ec;font-variant-numeric:tabular-nums">{{ t.entry }}</td><td style="padding:13px 8px;color:#dbe0ec;font-variant-numeric:tabular-nums">{{ t.latest }}</td><td style="padding:13px 16px;text-align:right;font-weight:500;color:{{ t.pc }};font-variant-numeric:tabular-nums">{{ t.pnl }}</td></tr></sc-for></tbody>
+</table>
+<sc-if value="{{ noTrades }}"><div style="padding:24px;text-align:center;color:#8a93a8">No pairs match your search.</div></sc-if></div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isTable }}">
+<section style="background:#111827;border:1px solid rgba(212,175,55,.25);border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.28)">
+<sc-if value="{{ hasRows }}"><div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;min-width:{{ tableMin }};font-size:14px">
+<thead><tr style="background:#1a2340"><sc-for list="{{ cols }}" as="c"><th style="text-align:left;padding:14px 16px;font-weight:400;font-size:12px;letter-spacing:.1em;color:#d4af37;white-space:nowrap">{{ c }}</th></sc-for></tr></thead>
+<tbody><sc-for list="{{ rows }}" as="r"><tr style="border-top:1px solid rgba(255,255,255,.07)"><sc-for list="{{ r.cells }}" as="c"><td style="padding:14px 16px;color:{{ c.c }};font-weight:{{ c.w }};white-space:nowrap">{{ c.t }}</td></sc-for></tr></sc-for></tbody>
+</table></div></sc-if>
+<sc-if value="{{ noRows }}"><div style="margin:18px;border:1px dashed rgba(138,147,168,.4);border-radius:14px;min-height:120px;display:flex;align-items:center;justify-content:center;color:#8a93a8;letter-spacing:.12em;font-size:14px;text-align:center;padding:16px">{{ emptyText }}</div></sc-if>
+</section>
+</sc-if>
+
+<sc-if value="{{ isForm }}">
+<form onSubmit="{{ submitForm }}" novalidate="novalidate" style="background:#111827;border:1px solid rgba(212,175,55,.25);border-top:5px solid #d4af37;border-radius:18px;padding:22px 18px;max-width:520px;box-shadow:0 10px 30px rgba(0,0,0,.28)">
+<sc-for list="{{ formFields }}" as="f">
+<div style="margin-bottom:16px"><label style="display:block;font-size:12px;letter-spacing:.1em;color:#d4af37;margin-bottom:8px">{{ f.label }}</label>
+<sc-if value="{{ f.isArea }}"><textarea rows="4" placeholder="{{ f.ph }}" value="{{ f.val }}" onInput="{{ f.on }}" style="width:100%;box-sizing:border-box;background:#0a1020;border:1px solid {{ f.bc }};border-radius:12px;padding:12px 14px;color:#fff;font:400 16px 'Poppins',sans-serif;outline:none;resize:vertical"></textarea></sc-if>
+<sc-if value="{{ f.isInput }}"><input type="text" inputMode="{{ f.mode }}" placeholder="{{ f.ph }}" value="{{ f.val }}" onInput="{{ f.on }}" autocomplete="off" style="width:100%;box-sizing:border-box;height:50px;background:#0a1020;border:1px solid {{ f.bc }};border-radius:12px;padding:0 14px;color:#fff;font:400 16px 'Poppins',sans-serif;outline:none" /></sc-if>
+<div style="color:#ff8a8a;font-size:12px;min-height:14px;margin-top:4px">{{ f.err }}</div></div>
+</sc-for>
+<button type="submit" style="width:100%;height:52px;border:0;border-radius:12px;background:linear-gradient(90deg,#d4af37,#f0e0a0);color:#0a1020;font:500 16px 'Poppins',sans-serif;letter-spacing:.08em;cursor:pointer;box-shadow:0 0 20px rgba(212,175,55,.4)" style-hover="filter:brightness(1.08)">{{ btn }}</button>
+<sc-if value="{{ calcOut }}"><div style="margin-top:16px;border:1px solid #1f8fff;background:rgba(0,168,255,.12);border-radius:12px;padding:14px 16px;color:#4db8ff;font-size:15px">{{ calcOut }}</div></sc-if>
+</form>
+</sc-if>
+
+</main>
+</sc-if>
+
+<sc-if value="{{ modalOpen }}">
+<div style="position:fixed;inset:0;z-index:100;background:rgba(5,9,20,.7);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:20px" onClick="{{ closeModal }}">
+<div onClick="{{ stop }}" role="dialog" aria-modal="true" style="width:min(100%,380px);background:#0d1424;border:1px solid rgba(212,175,55,.5);border-radius:20px;padding:26px 22px;box-shadow:0 0 40px rgba(212,175,55,.2);animation:wfIn .25s">
+<div style="color:#d4af37;font-size:22px;font-weight:500">Confirm Purchase</div>
+<p style="color:#cbd2e1;font-size:15px;line-height:1.55;margin:12px 0 4px">Activate <b style="color:#fff">{{ mName }}</b> for <b style="color:#22c55e">{{ mPrice }}</b>? Daily ROI {{ mRoi }} for 25 days.</p>
+<p style="color:#8a93a8;font-size:12px;margin:0 0 20px">Demo only — no funds move. Sample figures are not real returns.</p>
+<div style="display:flex;gap:12px"><button onClick="{{ closeModal }}" style="flex:1;height:48px;border-radius:12px;background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;font:500 15px 'Poppins',sans-serif;cursor:pointer">CANCEL</button><button onClick="{{ confirmBuy }}" style="flex:1;height:48px;border:0;border-radius:12px;background:linear-gradient(90deg,#d4af37,#f0e0a0);color:#0a1020;font:500 15px 'Poppins',sans-serif;cursor:pointer;box-shadow:0 0 16px rgba(212,175,55,.35)">CONFIRM</button></div>
+</div></div>
+</sc-if>
+
+<div role="status" style="position:fixed;left:50%;bottom:28px;z-index:120;transform:translateX(-50%) translateY({{ toastY }});opacity:{{ toastOp }};transition:all .3s;background:#141c33;border:1px solid #d4af37;color:#f0e0a0;padding:12px 20px;border-radius:99px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);pointer-events:none;max-width:90vw;text-align:center">{{ toast }}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { route: 'login', menu: false, toast: '', toastOn: false, modal: null, q: '', owned: [], now: Date.now(), end: Date.now() + (4 * 864e5 + 14 * 36e5 + 24 * 6e4), rem: false, login: { id: '', pw: '' }, reg: { sponsor: '', name: '', country: '', email: '', mobile: '', wallet: '', pw: '' }, terms: false, errs: {}, forms: {}, calcOut: '' };
+
+  componentDidMount() {
+    this.onHash = () => { this.setState({ route: this.parse(), menu: false, errs: {}, calcOut: '' }); window.scrollTo(0, 0); };
+    window.addEventListener('hashchange', this.onHash);
+    this.onHash();
+    this.tick = setInterval(() => this.setState({ now: Date.now() }), 1000);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.onHash); clearInterval(this.tick); clearTimeout(this.tt); }
+  parse() { const r = (location.hash || '').replace(/^#\/?/, '').split('?')[0]; return r || 'login'; }
+  say(m) { clearTimeout(this.tt); this.setState({ toast: m, toastOn: true }); this.tt = setTimeout(() => this.setState({ toastOn: false }), 2200); }
+  copy(t, m) { try { navigator.clipboard.writeText(t).catch(() => {}); } catch (e) {} this.say(m); }
+  go(r) { location.hash = '#/' + r; }
+
+  renderVals() {
+    const s = this.state, r = s.route;
+    const PK = [[2, .1], [5, .25], [10, .5], [20, 1], [50, 2.5], [100, 5], [200, 10], [500, 25]];
+    const d2 = n => '$' + n.toFixed(2);
+    const packages = PK.map((p, i) => ({ name: 'SAVING ' + (i + 1), price: '$' + p[0], roi: d2(p[1]), total: d2(p[1] * 25), buy: () => this.setState({ modal: i }) }));
+    const authR = r === 'login' || r === 'register';
+    const known = ['dashboard', 'profile', 'live-trading', 'my-packages'];
+    const D = {
+      'dashboard': 'x',
+    };
+    const gold = '#d4af37';
+    const T = {
+      'live-feed': ['System Live Feed', 'Recent platform activity — sample entries', ['TIME', 'EVENT', 'AMOUNT'], [['09:41:02', 'Package activated · SAVING 3', '$10.00'], ['09:38:47', 'Daily ROI credited', '+$0.50'], ['09:35:10', 'New member joined', '—'], ['09:31:55', 'Withdrawal processed', '-$25.00'], ['09:27:30', 'Package activated · SAVING 5', '$50.00'], ['09:22:18', 'Daily ROI credited', '+$2.50']]],
+      'package-details': ['Package Details', 'Sample package schedule', ['PACKAGE', 'PRICE', 'DAILY ROI', 'DAYS', 'TOTAL PROFIT'], PK.map((p, i) => ['SAVING ' + (i + 1), '$' + p[0], d2(p[1]), '25', d2(p[1] * 25)])],
+      'compound': ['Compound Packages', 'Auto-compound plans (sample)', ['PLAN', 'PRINCIPAL', 'CYCLE', 'STATUS'], [['COMPOUND 1', '$50.00', '25 days', 'Active'], ['COMPOUND 2', '$20.93', '25 days', 'Active'], ['COMPOUND 3', '$100.00', '25 days', 'Pending']]],
+      'deposit-history': ['Deposit History', 'Sample records', ['DATE', 'TX HASH', 'AMOUNT', 'STATUS'], [['09-Oct-2026', '0x00…0001', '$50.00', 'Success'], ['10-Oct-2026', '0x00…0002', '$20.00', 'Success'], ['12-Oct-2026', '0x00…0003', '$14.00', 'Pending']]],
+      'direct-team': ['Direct Team', 'Members you sponsored (sample)', ['USER ID', 'NAME', 'JOINED', 'INVESTMENT'], [['WF0000002', 'Demo Member 1', '10-Oct-2026', '$50.00'], ['WF0000003', 'Demo Member 2', '11-Oct-2026', '$20.00'], ['WF0000004', 'Demo Member 3', '12-Oct-2026', '$0.00']]],
+      'level-team': ['Level Team', 'Members by level (sample)', ['LEVEL', 'MEMBERS', 'ACTIVE', 'BUSINESS'], [['Level 1', '3', '2', '$70.00'], ['Level 2', '5', '1', '$50.00'], ['Level 3', '0', '0', '$0.00']]],
+      'team-business': ['Team Business', 'Business volume (sample)', ['PERIOD', 'SELF', 'TEAM', 'TOTAL'], [['This week', '$50.00', '$120.00', '$170.00'], ['This month', '$70.93', '$340.00', '$410.93'], ['All time', '$70.93', '$340.00', '$410.93']]],
+      'salary': ['Salary Achievers', 'Sample leaderboard', ['RANK', 'USER ID', 'NAME', 'MONTH'], [['1', 'WF0000011', 'Demo Achiever A', 'Month 2'], ['2', 'WF0000012', 'Demo Achiever B', 'Month 1'], ['3', 'WF0000013', 'Demo Achiever C', 'Month 1']]],
+      'lucky-winners': ['Lucky Winners', 'Sample draw results', ['DRAW', 'USER ID', 'PRIZE', 'DATE'], [['#001', 'WF0000021', '$10.00', '01-Oct-2026'], ['#002', 'WF0000022', '$10.00', '08-Oct-2026']]],
+      'withdrawal-history': ['Withdrawal History', 'Your withdrawals', ['DATE', 'WALLET', 'AMOUNT', 'STATUS'], []],
+      'transfer-history': ['Fund Transfer History', 'Sample records', ['DATE', 'TO', 'AMOUNT', 'STATUS'], [['11-Oct-2026', 'WF0000002', '$5.00', 'Success']]]
+    };
+    const F = {
+      'withdrawal': ['Withdrawal', 'Available balance: $0.00 (sample)', [['amount', 'AMOUNT (USDT)', 'e.g. 25', 'decimal'], ['wallet', 'USDT (BEP-20) WALLET ADDRESS', '0x0000...0000', 'text']], 'SUBMIT WITHDRAWAL', 'Withdrawal request submitted (demo)'],
+      'fund-transfer': ['Fund Transfer', 'Send funds to another member', [['to', 'RECEIVER USER ID', 'WF0000000', 'text'], ['amount', 'AMOUNT (USDT)', 'e.g. 10', 'decimal']], 'TRANSFER FUND', 'Transfer submitted (demo)'],
+      'wallet-to-fund': ['Wallet to Fund', 'Move earnings into your fund wallet', [['amount', 'AMOUNT (USDT)', 'e.g. 10', 'decimal']], 'MOVE TO FUND WALLET', 'Moved to fund wallet (demo)'],
+      'recharge': ['Recharge', 'Add funds via USDT (BEP-20)', [['amount', 'AMOUNT (USDT)', 'e.g. 50', 'decimal'], ['hash', 'TRANSACTION HASH', '0x…', 'text']], 'SUBMIT DEPOSIT', 'Deposit submitted (demo)'],
+      'support': ['Support', 'We usually reply within 24h (demo)', [['subject', 'SUBJECT', 'How can we help?', 'text'], ['msg', 'MESSAGE', 'Describe your issue', 'area']], 'SEND MESSAGE', 'Message sent (demo)'],
+      'tickets': ['Tickets', 'Raise a new ticket', [['subject', 'SUBJECT', 'Ticket subject', 'text'], ['msg', 'MESSAGE', 'Describe your issue', 'area']], 'CREATE TICKET', 'Ticket created (demo)'],
+      'calculator': ['Calculator', 'Estimate sample earnings', [['amount', 'PACKAGE PRICE ($)', 'e.g. 100', 'decimal'], ['days', 'DAYS', '25', 'numeric']], 'CALCULATE', '']
+    };
+    const isTable = !!T[r], isForm = !!F[r];
+    const tcfg = T[r], fcfg = F[r];
+    const colorFor = (t, i) => /^\+/.test(t) ? '#22c55e' : /^-\$|^-\d/.test(t) ? '#ef4444' : /^(Success|Active|Paid)$/.test(t) ? '#22c55e' : t === 'Pending' ? gold : i === 0 ? '#fff' : '#cbd2e1';
+    const rows = tcfg ? tcfg[3].map(row => ({ cells: row.map((t, i) => ({ t, c: colorFor(t, i), w: i === 0 ? 500 : 400 })) })) : [];
+
+    const field = (scope, key, st, set) => ({ val: st[key] || '', on: e => set(key, e.target.value), err: s.errs[scope + key] || '', bc: s.errs[scope + key] ? '#ef4444' : 'rgba(255,255,255,.45)' });
+    const ERR_BC = '#ef4444';
+    const setLogin = (k, v) => this.setState(st => ({ login: { ...st.login, [k]: v }, errs: { ...st.errs, ['l' + k]: '' } }));
+    const loginFields = [['id', 'USER ID', 'text'], ['pw', 'USER PASSWORD', 'password']].map(a => ({ ph: a[1], type: a[2], ...field('l', a[0], s.login, setLogin) }));
+    const setReg = (k, v) => this.setState(st => ({ reg: { ...st.reg, [k]: v }, errs: { ...st.errs, ['r' + k]: '' } }));
+    const regFields = [['sponsor', 'Sponsor ID *', 'text'], ['name', 'Full Name *', 'text'], ['country', 'Select Country *', 'select'], ['email', 'Email Id *', 'email'], ['mobile', 'Mobile No. *', 'tel'], ['wallet', 'USDT (BEP-20) Wallet Address *', 'text'], ['pw', 'Set Login Password *', 'password']].map(a => ({ ph: a[1], type: a[2], isSelect: a[2] === 'select', isInput: a[2] !== 'select', selColor: s.reg[a[0]] ? '#fff' : '#8a93a8', ...field('r', a[0], s.reg, setReg) }));
+
+    const doLogin = e => {
+      e.preventDefault(); const errs = {};
+      if (!s.login.id.trim()) errs.lid = 'User ID is required';
+      if (!s.login.pw) errs.lpw = 'Password is required';
+      this.setState({ errs }); if (Object.keys(errs).length) return;
+      this.say('Welcome back, Demo User'); this.go('dashboard');
+    };
+    const doRegister = e => {
+      e.preventDefault(); const v = s.reg, errs = {};
+      if (!/^WF\d{7}$/i.test(v.sponsor.trim())) errs.rsponsor = 'Format: WF0000000';
+      if (v.name.trim().length < 2) errs.rname = 'Enter your full name';
+      if (!v.country) errs.rcountry = 'Select a country';
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) errs.remail = 'Enter a valid email';
+      if (!/^\+?\d{7,15}$/.test(v.mobile.replace(/[\s-]/g, ''))) errs.rmobile = 'Enter a valid mobile number';
+      if (!/^0x[0-9a-fA-F.]{6,}$/.test(v.wallet.trim())) errs.rwallet = 'Enter a valid 0x… address';
+      if (v.pw.length < 8) errs.rpw = 'At least 8 characters';
+      if (!s.terms) errs.terms = 'Please accept the terms';
+      this.setState({ errs }); if (Object.keys(errs).length) return;
+      this.say('Demo account created — please log in'); this.go('login');
+    };
+
+    const fkey = k => r + '.' + k;
+    const formFields = fcfg ? fcfg[2].map(a => ({ label: a[1], ph: a[2], mode: a[3] === 'area' ? 'text' : a[3], isArea: a[3] === 'area', isInput: a[3] !== 'area', val: s.forms[fkey(a[0])] || '', err: s.errs[fkey(a[0])] || '', bc: s.errs[fkey(a[0])] ? ERR_BC : 'rgba(212,175,55,.3)', on: e => { const v = e.target.value; this.setState(st => ({ forms: { ...st.forms, [fkey(a[0])]: v }, errs: { ...st.errs, [fkey(a[0])]: '' } })); } })) : [];
+    const submitForm = e => {
+      e.preventDefault(); const errs = {};
+      fcfg[2].forEach(a => {
+        const k = a[0], v = (s.forms[fkey(k)] || '').trim(); let m = '';
+        if (!v) m = 'This field is required';
+        else if (a[3] === 'decimal' && !(+v > 0)) m = 'Enter a number above 0';
+        else if (k === 'days' && !(+v >= 1 && +v <= 365)) m = 'Enter 1–365 days';
+        else if (k === 'wallet' && !/^0x[0-9a-fA-F.]{6,}$/.test(v)) m = 'Enter a valid 0x… address';
+        else if (k === 'to' && !/^WF\d{7}$/i.test(v)) m = 'Format: WF0000000';
+        if (m) errs[fkey(k)] = m;
+      });
+      this.setState({ errs }); if (Object.keys(errs).length) return;
+      if (r === 'calculator') { const a = +s.forms['calculator.amount'], dd = +s.forms['calculator.days']; this.setState({ calcOut: 'Sample: $' + (a * .05 * dd).toFixed(2) + ' over ' + dd + ' days at 5% daily — illustrative only, not a promise of returns.' }); return; }
+      this.say(fcfg[4]); this.setState(st => { const f = { ...st.forms }; fcfg[2].forEach(a => delete f[fkey(a[0])]); return { forms: f }; });
+    };
+
+    const nav = [['MAIN MENU'], ['Dashboard', 'dashboard', 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'], ['System Live Feed', 'live-feed', 'M22 12h-4l-3 9L9 3l-3 9H2'], ['Live Trading', 'live-trading', 'M22 12h-4l-3 9L9 3l-3 9H2'], ['My Profile', 'profile', 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6.2 19c1-2.4 3.2-3.5 5.8-3.5s4.8 1.1 5.8 3.5'], ['Package Details', 'package-details', 'M13 2 3 14h9l-1 8 10-12h-9z'], ['My Packages', 'my-packages', 'M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8'], ['Compound Packages', 'compound', 'M12 2 2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5'],
+      ['NETWORK & HISTORY'], ['Deposit History', 'deposit-history', 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2'], ['Direct Team', 'direct-team', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'], ['Level Team', 'level-team', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'], ['Team Business', 'team-business', 'M12 2 2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5'], ['Salary Achievers', 'salary', 'M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3'], ['Lucky Winners', 'lucky-winners', 'M20 12v10H4V12M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z'], ['Withdrawal History', 'withdrawal-history', 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3'], ['Fund Transfer History', 'transfer-history', 'M17 3l4 4-4 4M21 7H3M7 21l-4-4 4-4M3 17h18'],
+      ['ACCOUNT'], ['Support', 'support', 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.9 4.9l4.3 4.3M14.8 14.8l4.3 4.3M14.8 9.2l4.3-4.3M4.9 19.1l4.3-4.3'], ['Logout', 'login', 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9']];
+    const navItems = nav.map(n => n.length === 1 ? { header: true, label: n[0] } : { isLink: true, label: n[0], href: '#/' + n[1], d: n[2], color: r === n[1] ? gold : '#aab2c5', bg: r === n[1] ? 'rgba(255,255,255,.08)' : 'transparent', bar: r === n[1] ? gold : 'transparent' });
+
+    const stats = [['TOTAL INVESTMENT', '$2,408.00', gold, '#111', '#d4930f', '#e0a213'], ["TODAY'S TOTAL INVESTMENT", '$14.00', '#aab2c5', '#fff', '#1a2038', 'rgba(255,255,255,.12)'], ['MY EARNING', '$0.00', '#2fe3a0', '#fff', '#171f38', 'rgba(255,255,255,.12)'], ['MY TOPUP', '$0.00', '#e0b019', '#fff', '#171f38', 'rgba(255,255,255,.12)'], ['AUTO COMPOUND ACTIVE', '$70.93', '#2fe3a0', '#fff', '#171f38', 'rgba(255,255,255,.12)'], ['HIGHEST ACTIVE PKG', '$0.00', '#22d3ee', '#fff', '#171f38', 'rgba(255,255,255,.12)']].map(a => ({ label: a[0], value: a[1], lc: a[0] === 'TOTAL INVESTMENT' ? '#111' : a[2], vc: a[3], bg: a[4], bd: a[5] }));
+    stats[0].lc = '#1a1405'; stats[0].value = '$2,408.00';
+
+    const diff = Math.max(0, s.end - s.now), dd = Math.floor(diff / 864e5), hh = Math.floor(diff % 864e5 / 36e5), mm = Math.floor(diff % 36e5 / 6e4), ss = Math.floor(diff % 6e4 / 1e3);
+    const countdown = dd + 'd ' + hh + 'h ' + mm + 'm ' + String(ss).padStart(2, '0') + 's';
+
+    const TR = [['DOGE/USDT', 'Long', '15X', '0.069880', '0.079800', '+212.94'], ['LINK/USDT', 'Long', '15X', '8.198000', '12.059000', '+706.45'], ['BTC/USDT', 'Long', '15X', '64230.010000', '80963.800000', '+390.79'], ['TRX/USDT', 'Short', '20X', '0.327500', '0.330800', '-20.15'], ['BNB/USDT', 'Short', '20X', '600.140000', '715.820000', '-385.51'], ['SOL/USDT', 'Long', '5X', '74.070000', '102.490000', '+191.85'], ['ETH/USDT', 'Long', '5X', '1871.050000', '2360.540000', '+130.81'], ['ADA/USDT', 'Short', '10X', '0.194100', '0.220600', '-136.53'], ['LTC/USDT', 'Long', '5X', '44.940000', '58.000000', '+145.30'], ['ATOM/USDT', 'Long', '5X', '1.354000', '1.690000', '+124.08'], ['DOT/USDT', 'Long', '15X', '0.853000', '1.099000', '+432.59'], ['UNI/USDT', 'Long', '5X', '3.957000', '6.895000', '+371.24']];
+    const q = s.q.trim().toLowerCase();
+    const trades = TR.filter(t => t[0].toLowerCase().includes(q)).map(t => { const lg = t[1] === 'Long', up = t[5][0] === '+'; return { pair: t[0], side: t[1] + ' ' + t[2], sc: lg ? '#22c55e' : '#ef4444', entry: t[3], latest: t[4], pnl: t[5] + '%', pc: up ? '#22c55e' : '#ef4444' }; });
+
+    const titles = { profile: 'USER DETAIL', 'live-trading': 'Live Trading', 'my-packages': 'My Packages' };
+    const title = r === 'profile' ? 'User Detail' : tcfg ? tcfg[0] : fcfg ? fcfg[0] : titles[r] || '';
+    const sub = tcfg ? tcfg[1] : fcfg ? fcfg[1] : r === 'live-trading' ? 'Sample AI trading positions — not real returns' : r === 'my-packages' ? 'Your active packages' : '';
+    const isDash = r === 'dashboard', isProfile = r === 'profile';
+    const isApp = !authR;
+    const m = s.modal, mp = m !== null ? PK[m] : [0, 0];
+    const mono = "'JetBrains Mono',monospace";
+    const pageBg = isDash ? '#eef7f5' : authR ? '#050b1c' : '#0a1020';
+
+    return {
+      pageBg, isAuth: authR, isApp, isLogin: r === 'login', isRegister: r === 'register',
+      loginFields, regFields, countries: ['India', 'United States', 'United Kingdom', 'United Arab Emirates', 'Bangladesh', 'Pakistan', 'Nigeria', 'Indonesia', 'Other'],
+      rem: s.rem, toggleRem: () => this.setState({ rem: !s.rem }), terms: s.terms, toggleTerms: () => this.setState({ terms: !s.terms, errs: { ...s.errs, terms: '' } }), termsErr: s.errs.terms || '',
+      forgot: e => { e.preventDefault(); this.say('Password reset is disabled in demo'); },
+      doLogin, doRegister,
+      menuD: s.menu ? 'M18 6 6 18M6 6l12 12' : 'M3 6h18M3 12h18M3 18h18',
+      toggleMenu: () => this.setState({ menu: !s.menu }), closeMenu: () => this.setState({ menu: false }),
+      overlayOp: s.menu ? 1 : 0, overlayPE: s.menu ? 'auto' : 'none', navX: s.menu ? '0' : '105%', navItems,
+      isDash, stats, levels: [{ label: 'Level 1 ($50+ Users)', prog: '0 / 3', pct: '0%' }, { label: 'Level 2 ($50+ Users)', prog: '0 / 6', pct: '0%' }], countdown,
+      copyId: () => this.copy('WF0000001', 'User ID copied'), copyRef: () => this.copy('https://example.com/register?ref=WF0000001', 'Referral link copied'),
+      quick: [['Recharge', 'recharge', 'M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'], ['Withdrawal', 'withdrawal', 'M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM2 10h20'], ['Fund Transfer', 'fund-transfer', 'M17 3l4 4-4 4M21 7H3M7 21l-4-4 4-4M3 17h18'], ['Wallet to Fund', 'wallet-to-fund', 'M19 7V5a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4M21 12h-4a2 2 0 0 0 0 4h4zM3 6v12a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-3'], ['Team', 'direct-team', 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8'], ['Support', 'support', 'M3 18v-6a9 9 0 0 1 18 0v6M21 19a2 2 0 0 1-2 2h-1v-7h3zM3 19a2 2 0 0 0 2 2h1v-7H3z'], ['Tickets', 'tickets', 'M2 9a3 3 0 0 1 0 6v3h20v-3a3 3 0 0 1 0-6V6H2zM13 6v12'], ['Calculator', 'calculator', 'M5 2h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01']].map(a => ({ label: a[0], href: '#/' + a[1], d: a[2] })),
+      packages,
+      isTitled: !isDash && !authR, title, sub,
+      isProfile, profile: [['Sponsor ID', 'WF0000000'], ['My Name', 'Demo User'], ['My User ID', 'WF0000001'], ['Joining', '09-Oct-2026'], ['Email', 'demo@example.com'], ['Country', 'India'], ['Wallet (BEP20)', '0x0000...0000', 1]].map(a => ({ k: a[0], v: a[1], c: a[2] ? gold : '#8a93a8', f: a[2] ? mono : 'inherit' })),
+      showMyPk: isDash || r === 'my-packages', noOwned: !s.owned.length,
+      owned: s.owned,
+      showTrading: isDash || r === 'live-trading', stamp: new Date(s.now).toISOString(), q: s.q, setQ: e => this.setState({ q: e.target.value }), trades, noTrades: !trades.length,
+      isTable, cols: tcfg ? tcfg[2] : [], rows, hasRows: rows.length > 0, noRows: tcfg && !rows.length, emptyText: 'NO RECORDS FOUND', tableMin: tcfg ? (tcfg[2].length * 130) + 'px' : '0',
+      isForm, formFields, submitForm, btn: fcfg ? fcfg[3] : '', calcOut: s.calcOut,
+      modalOpen: m !== null, mName: 'SAVING ' + ((m || 0) + 1), mPrice: '$' + mp[0], mRoi: d2(mp[1]),
+      closeModal: () => this.setState({ modal: null }), stop: e => e.stopPropagation(),
+      confirmBuy: () => { const o = { name: 'SAVING ' + (m + 1), price: '$' + mp[0], roi: d2(mp[1]), date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) }; this.setState(st => ({ owned: [o, ...st.owned], modal: null })); this.say(o.name + ' activated (demo)'); },
+      toast: s.toast, toastOp: s.toastOn ? 1 : 0, toastY: s.toastOn ? '0' : '20px'
+    };
+  }
+}
+</script>
+</body>
+</html>

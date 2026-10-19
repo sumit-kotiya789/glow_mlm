@@ -1,0 +1,96 @@
+GLOW - COMMANDS
+===============
+Run every command from the project folder:
+    cd C:\xamppppppp\htdocs\MLM\GLOW
+
+If "php" or "mysql" is not found, use the full XAMPP paths instead:
+    C:\xamppppppp\php\php.exe
+    C:\xamppppppp\mysql\bin\mysql.exe
+
+
+1. FIRST-TIME SETUP (once)
+--------------------------
+Start Apache + MySQL in the XAMPP Control Panel, then create the database:
+    mysql -u root -e "CREATE DATABASE glow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+(or phpMyAdmin > New > name "glow", collation utf8mb4_unicode_ci)
+
+
+2. FILL / RESET THE DATABASE
+----------------------------
+Full demo (135 members over 10 levels, plans, 4 days of payouts, plus test accounts):
+    php db/seed.php
+    -> prints the test accounts (salary almost met, plan maturing today, blocked user, ...)
+       full list in README.md > Demo logins
+
+Empty start for testing from zero (admin + settings + one top member only):
+    php db/seed.php --fresh
+
+Both commands WIPE all data and reset settings to defaults.
+
+
+3. START THE WEBSITE
+--------------------
+Option A - PHP built-in server:
+    php -S localhost:8000 -t public
+    Member:  http://localhost:8000
+    Admin:   http://localhost:8000/admin
+    (stop with Ctrl + C)
+
+Option B - XAMPP Apache (no command needed):
+    Member:  http://localhost/MLM/GLOW/public/
+    Admin:   http://localhost/MLM/GLOW/public/admin
+
+
+4. LOGINS
+---------
+Member:  GL0000001 / demo1234   (every seeded member uses demo1234)
+Admin:   admin / admin1234
+
+
+5. PAYOUT (ROI, maturity, salary)
+---------------------------------
+Pay every due period up to now (safe to run any time, a period is never paid twice):
+    php cron/payout.php
+
+Testing: pay the next period(s) right now (moves the payout date forward):
+    php cron/payout.php --next
+    php cron/payout.php --next=25
+
+Same buttons exist in Admin > Dashboard (Run Due Payouts, +1 / +5 / +25).
+
+FAST TESTING - hour mode:
+    Admin > Settings > Payout > "Hour (testing)"
+    Every "day" of the rules becomes 1 hour: ROI every hour, a 25-day plan matures in 25 hours.
+    Switch back to "Day (live)" when done, then run:  php db/seed.php --fresh
+
+Run automatically (Windows Task Scheduler, every 15 minutes):
+    Program:    C:\xamppppppp\php\php.exe
+    Arguments:  C:\xamppppppp\htdocs\MLM\GLOW\cron\payout.php
+
+Or create the task with one command (run cmd as Administrator):
+    schtasks /create /tn "GLOW payout" /sc minute /mo 15 /tr "C:\xamppppppp\php\php.exe C:\xamppppppp\htdocs\MLM\GLOW\cron\payout.php"
+
+Remove that task:
+    schtasks /delete /tn "GLOW payout" /f
+
+
+6. TEST THE ENGINE
+------------------
+Checks all business rules on a temporary database (does NOT touch "glow"):
+    php tests/engine_check.php
+    -> must end with "ALL PASSED"
+
+
+7. OPTIONAL: REMOVE THE "bcmath" WARNING
+----------------------------------------
+The warning comes from XAMPP's php.ini, not from GLOW. bcmath is already built in.
+Open C:\xamppppppp\php\php.ini, find this line (around line 934):
+    extension=bcmath
+change it to:
+    ;extension=bcmath
+then restart Apache in the XAMPP Control Panel.
+
+
+Rules / spec:  docs/RULES.md
+Full guide:    README.md

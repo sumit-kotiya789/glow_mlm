@@ -1,0 +1,6 @@
+# Apache: only /public is web-facing. Blocks direct access to app/, db/ (SQLite file), config.php.
+RewriteEngine On
+# BASE = URL folder this file lives in (/MLM/GLOW/, /glow/, /), so the redirect works in any folder.
+RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
+RewriteRule ^(.*)$ - [E=BASE:%1]
+RewriteRule ^(?!public/) %{ENV:BASE}public/ [R=302,L]

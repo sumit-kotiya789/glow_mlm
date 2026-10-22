@@ -37,7 +37,8 @@ $blocked = (int) $user['is_blocked'] === 1;
 
 <section class="stat-grid" aria-label="Wallets">
     <?php partial('stat-card', ['label' => 'Deposit Wallet', 'value' => money($user['deposit_balance']), 'tone' => 'muted']) ?>
-    <?php partial('stat-card', ['label' => 'ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green']) ?>
+    <?php partial('stat-card', ['label' => 'Compound ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green']) ?>
+    <?php partial('stat-card', ['label' => 'FD ROI Wallet', 'value' => money($user['fd_balance']), 'tone' => 'cyan']) ?>
     <?php partial('stat-card', ['label' => 'Income Wallet', 'value' => money($user['income_balance']), 'tone' => 'amber']) ?>
     <?php partial('stat-card', ['label' => 'Active Investment', 'value' => money($summary['invested']), 'tone' => 'gold']) ?>
     <?php partial('stat-card', ['label' => 'Active Plans', 'value' => (string) $summary['active'], 'tone' => 'cyan']) ?>
@@ -150,7 +151,7 @@ $blocked = (int) $user['is_blocked'] === 1;
         'columns' => ['date' => 'Date', 'wallet' => 'Wallet', 'type' => 'Type', 'amount' => 'Amount', 'note' => 'Note'],
         'rows' => array_map(static fn ($r) => [
             'date' => fmt_date($r['created_at'], 'd-M-Y H:i'),
-            'wallet' => ucfirst($r['wallet']),
+            'wallet' => Ledger::WALLETS[$r['wallet']] ?? ucfirst($r['wallet']),
             'type' => Ledger::TYPES[$r['type']] ?? $r['type'],
             'amount' => [money($r['amount']), 'num ' . ((float) $r['amount'] < 0 ? 'is-red' : 'is-green')],
             'note' => ($r['from_code'] ? $r['from_code'] . ' L' . $r['level'] . ' · ' : '') . $r['note'],

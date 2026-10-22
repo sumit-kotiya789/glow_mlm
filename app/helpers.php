@@ -122,6 +122,16 @@ function toast(string $message, string $type = 'success'): void
     $_SESSION['_flash']['toasts'][] = ['message' => $message, 'type' => $type];
 }
 
+/**
+ * Animated success popup on the next page (partials/notice.php).
+ *
+ * @param array<string, string> $rows label => value
+ */
+function notice(string $title, string $text, array $rows = []): void
+{
+    flash('notice', ['title' => $title, 'text' => $text, 'rows' => $rows]);
+}
+
 /** Previous input after a failed validation. */
 function old(string $key, string $default = ''): string
 {

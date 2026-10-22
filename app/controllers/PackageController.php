@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Auth;
+use App\Database;
 use App\Models\Investment;
 use App\Models\PlanTerm;
 use App\Models\Setting;
@@ -13,7 +14,7 @@ use App\Models\Withdrawal;
 use DomainException;
 
 /**
- * Invest (Compound / Fixed Deposit), my plans, compound + withdraw actions, calculator.
+ * Invest (Compound / Fixed Deposit), my plans, compound + move-to-wallet actions, calculator.
  */
 final class PackageController
 {
@@ -43,13 +44,21 @@ final class PackageController
         } catch (DomainException $e) {
             fail('/package-details', ['amount' => $e->getMessage()]);
         }
-        toast(Investment::PLANS[$plan] . ' plan #' . $id . ' started: ' . money($raw) . ' for ' . $days . ' days.');
+        $inv = Investment::findForUser((int) Auth::id(), $id);
+        notice('Investment Successful', 'Your plan is running. Payouts start from the next period.', [
+            'Plan' => Investment::label($inv),
+            'Amount' => money($inv['amount']),
+            'Daily rate' => pct(PlanTerm::dailyRate($inv)),
+            'First payout' => Investment::firstPayout($inv),
+            'Matures on' => Investment::maturesOn($inv),
+            'Deposit wallet left' => money(User::find((int) Auth::id())['deposit_balance']),
+        ]);
         redirect('/my-packages');
     }
 
     public function mine(): void
     {
-        $this->plans(null, 'My Packages', 'All your plans. Compound or withdraw the daily principal part here.');
+        $this->plans(null, 'My Packages', 'All your plans. Compound the daily principal part or move it to your Compound ROI wallet.');
     }
 
     public function compound(): void
@@ -62,24 +71,38 @@ final class PackageController
         $back = $this->back();
         try {
             $part = Investment::compound((int) Auth::id(), (int) input('id'));
-            toast('Compounded ' . money($part) . ' into principal.');
+            $inv = Investment::findForUser((int) Auth::id(), (int) input('id'));
+            notice('Compounded', 'The latest part was added to your principal.', [
+                'Plan' => Investment::label($inv),
+                'Compounded' => money($part),
+                'New principal' => money($inv['principal']),
+                'Pending left' => money($inv['pending']),
+            ]);
         } catch (DomainException $e) {
             toast($e->getMessage(), 'error');
         }
         redirect($back);
     }
 
-    public function withdrawPending(): void
+    /** Pending principal parts -> Compound ROI wallet (instant). Withdrawn from the wallet page. */
+    public function releasePending(): void
     {
         $back = $this->back();
         $raw = input('amount');
+        $userId = (int) Auth::id();
         try {
             if (!preg_match('/^\d{1,7}(\.\d{1,2})?$/', $raw)) {
                 throw new DomainException('Enter a valid amount (up to 2 decimals).');
             }
-            User::verifyTxnPassword((int) Auth::id(), password_input('txn_password'));
-            $id = Withdrawal::request((int) Auth::id(), 'plan', (float) $raw, (int) input('id'));
-            toast('Withdrawal #' . $id . ' requested: ' . money($raw) . '. Admin will process it.');
+            Investment::release($userId, (int) input('id'), (float) $raw);
+            $inv = Investment::findForUser($userId, (int) input('id'));
+            notice('Moved to Compound ROI Wallet', 'Withdraw it from the Withdrawal page.', [
+                'Plan' => Investment::label($inv),
+                'Amount' => money($raw),
+                'New principal' => money($inv['principal']),
+                'Pending left' => money($inv['pending']),
+                'Compound ROI wallet' => money(User::find($userId)['roi_balance']),
+            ]);
         } catch (DomainException $e) {
             toast($e->getMessage(), 'error');
         }
@@ -138,7 +161,7 @@ final class PackageController
                 $compound
                 ? ['label' => 'Pending now', 'value' => money($inv['pending']), 'tone' => 'cyan']
                 : ['label' => 'Locked ROI now', 'value' => money($inv['accrued']), 'tone' => 'cyan'],
-                ['label' => 'Paid to ROI wallet', 'value' => money(array_sum(array_column($rows, 'roi'))), 'tone' => 'green'],
+                ['label' => 'Paid to ' . ($compound ? 'Compound' : 'FD') . ' ROI wallet', 'value' => money(array_sum(array_column($rows, 'roi'))), 'tone' => 'green'],
             ],
             'columns' => [
                 'date' => 'Date',
@@ -219,12 +242,13 @@ final class PackageController
             $paidOut += $part + round($base * $pf, 2);
             $base = $d < $days ? round($base - $part, 2) : $base;
         }
+        // At maturity the invested amount is not returned, only what grew on top of it.
         return [
             'daily' => round($amount * ($pr + $pf), 2),
             'profit' => $profit,
-            'final' => $principal,
-            'total' => $principal + $profit,
-            'withdraw_total' => $paidOut + $base,
+            'final' => $principal - $amount,
+            'total' => $principal - $amount + $profit,
+            'withdraw_total' => $paidOut,
         ];
     }
 
@@ -236,8 +260,25 @@ final class PackageController
             'subtitle' => $subtitle,
             'compoundOnly' => $plan === 'compound',
             'pager' => Investment::paginateForUser((int) Auth::id(), page_param(), $plan),
-            'pendingToday' => Withdrawal::todayTotal((int) Auth::id()),
         ]);
+    }
+
+    /**
+     * Popup rows for a new withdrawal request (also used by WalletController).
+     *
+     * @return array<string, string>
+     */
+    public static function withdrawalRows(int $id): array
+    {
+        $w = Database::one('SELECT * FROM withdrawals WHERE id = ?', [$id]);
+        return [
+            'Request' => '#' . $id . ' · Pending',
+            'From' => Withdrawal::SOURCES[$w['source']] . ($w['investment_id'] ? ' #' . $w['investment_id'] : ''),
+            'Amount' => money($w['amount']),
+            'Fee' => money($w['fee']),
+            'You get' => money($w['net_amount']),
+            'To wallet' => substr($w['wallet'], 0, 8) . '…' . substr($w['wallet'], -6),
+        ];
     }
 
     private function back(): string

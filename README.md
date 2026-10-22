@@ -22,7 +22,8 @@ php -S localhost:8000 -t public      # open http://localhost:8000
 
 XAMPP / Apache alternative: `http://localhost/MLM/GLOW/public/` (needs `mod_rewrite`).
 
-**Upgrading an existing database** (keeps your data): `php db/migrate_txn_password.php` adds the transaction-password columns once.
+**Upgrading an existing database** (keeps your data): `php db/migrate.php` adds any missing columns
+(transaction password, FD ROI wallet). Safe to run again.
 
 ## Demo logins
 
@@ -42,7 +43,7 @@ Test accounts (also printed by `php db/seed.php`):
 | `GL0000001`              | Salary at 5/5 directs, 8/10 level-2; pending $50 deposit (no bonus) and $2 ROI withdrawal; 2 tickets             |
 | `GL0000002`              | Maturity Tester (no sponsor): compound + FD at day 24/25. **Run Due Payouts** matures both, then limit $0        |
 | `GL0000209`, `GL0000210` | $100 in Deposit wallet. Invest with both and GL0000001 qualifies; set salary pay day to tomorrow, **+1** pays it |
-| `GL0000101`              | Compound plan, 4 days pending; pending $5 income and $8 plan withdrawals (reject refunds the plan)               |
+| `GL0000101`              | Compound plan, 4 days pending, $8 of it moved to Compound ROI wallet; pending $5 income withdrawal             |
 | `GL0000106`              | First deposit pending (approve pays $5 signup bonus), one rejected                                               |
 | `GL0000211`              | Registered, never deposited                                                                                      |
 | `GL0000212`              | Blocked                                                                                                          |

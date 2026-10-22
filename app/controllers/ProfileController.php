@@ -64,7 +64,7 @@ final class ProfileController
             fail('/profile#txn', $errors);
         }
         User::setTxnPassword($userId, $new);
-        toast($hasTxn ? 'Transaction password changed.' : 'Transaction password set.');
+        notice($hasTxn ? 'Password Changed' : 'Password Set', 'Use your new transaction password for withdrawals and transfers.');
         redirect('/profile#txn');
     }
 
@@ -101,8 +101,11 @@ final class ProfileController
         if ($errors) {
             fail('/support', $errors);
         }
-        Ticket::create((int) Auth::id(), $subject, $message);
-        toast('Ticket created. The admin will reply here.');
+        $id = Ticket::create((int) Auth::id(), $subject, $message);
+        notice('Ticket Created', 'The admin will reply on this page.', [
+            'Ticket' => '#' . str_pad((string) $id, 4, '0', STR_PAD_LEFT),
+            'Subject' => $subject,
+        ]);
         redirect('/support');
     }
 }

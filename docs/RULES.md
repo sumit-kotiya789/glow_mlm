@@ -9,7 +9,8 @@ Every number marked (cfg) is an admin setting.
 | Wallet  | Receives                                                    | Used for       |
 | ------- | ----------------------------------------------------------- | -------------- |
 | Deposit | Admin-approved deposits                                     | Investing only |
-| ROI     | Daily 1% profit, plan maturity payouts                      | Withdrawal     |
+| Compound ROI | Compound plans: daily 1% profit, pending moved by the member, maturity payout | Withdrawal |
+| FD ROI  | Fixed Deposit maturity payout (principal + locked ROI)      | Withdrawal     |
 | Income  | Direct, level, ROI-on-ROI, lucky draw, salary, signup bonus | Withdrawal     |
 
 Allowed moves are in section 9a. Nothing else moves between wallets or users.
@@ -34,19 +35,22 @@ Each daily payout credits 5% of current principal:
 - **1% profit** -> ROI wallet automatically.
 - **4% principal part** -> plan's pending balance. User may:
   - **Compound** only the **latest day's** part, until the next payout -> principal += part.
-  - **Withdraw** any/all pending -> creates a withdrawal request directly; principal -= amount.
+  - **Move to wallet** any/all pending -> Compound ROI wallet instantly; principal -= amount. Withdraw it from
+    there like any wallet (fee, daily limit, admin approval).
   - Do nothing -> principal unchanged, pending keeps growing.
 - No compounding on the final day.
-- At maturity: remaining principal + all pending -> ROI wallet, plan closes.
+- At maturity the **invested amount is not returned**: all pending + anything compounded on top of the invested
+  amount -> Compound ROI wallet, plan closes. Example: $100 invested, compounded to $104 -> maturity pays all
+  pending + $4. Moved parts out down to $88 -> maturity pays all pending only.
 
-Example ($100): day 1 credit 4 + 1. Compound -> principal 104. Withdraw 4 -> principal 96.
-Nothing for 3 days -> pending 12; can compound only today's 4 (-> 104, 8 stays withdraw-only)
-or withdraw 12 (-> 88).
+Example ($100): day 1 credit 4 + 1. Compound -> principal 104. Move 4 to wallet -> principal 96.
+Nothing for 3 days -> pending 12; can compound only today's 4 (-> 104, 8 stays move-only)
+or move 12 to wallet (-> 88).
 
 ## 5. Fixed deposit
 
 - Locked for the term, same daily rate. ROI accrues daily but stays locked.
-- At maturity everything -> ROI wallet. $100 x 25 days @ 5% = $225.
+- At maturity everything -> FD ROI wallet. $100 x 25 days @ 5% = $225.
 
 ## 6. Incomes
 
@@ -60,6 +64,10 @@ or withdraw 12 (-> 88).
 | Signup bonus   | First approved deposit while switch ON                 | $5                        | Once                       |
 
 ROI-on-ROI is paid on the daily credit regardless of what the downline does with it.
+
+Direct, level and ROI-on-ROI income for level N is paid to an upline only if they are not blocked, have a
+**running plan** of their own and at least **N active directs** (directs with a running plan). Level 1 needs 1,
+level 2 needs 2 ... level 10 needs 10. Income an upline misses is not passed further up.
 
 ## 7. Salary
 
@@ -80,7 +88,8 @@ Keeps paying even if the user later withdraws investments.
 
 ## 9. Withdrawal
 
-- From ROI wallet, Income wallet, or a compound plan's pending principal.
+- From Compound ROI wallet, FD ROI wallet or Income wallet. (A compound plan's pending is first moved to the
+  Compound ROI wallet, section 4.)
 - $1–$1000 per request (cfg). Daily total limit = user's total active investment.
   With no running plan, the limit = the plans that matured most recently (same maturity day), so a member
   whose plans finished can still withdraw up to that amount per day. Never invested = $0.
@@ -91,13 +100,13 @@ Keeps paying even if the user later withdraws investments.
 ## 9a. Transfers (no fee, min $1 (cfg))
 
 - **P2P:** a member sends from their **Deposit wallet** to another member's **Deposit wallet** by entering the
-  receiver's User ID (e.g. GL0000001). The form shows the receiver's masked name to confirm the ID.
+  receiver's User ID (e.g. GL0000001). The form shows the receiver's name to confirm the ID.
   Only members with **at least one approved deposit** may send (stops signup-bonus farming with fake accounts).
   Anyone can receive. Not to yourself, not to a blocked user.
   The **signup bonus can be invested but never sent**: sendable = Deposit wallet - unspent bonus
   (investments spend the bonus first). Approved deposits, received P2P and ROI/Income moved into
   the Deposit wallet are all sendable.
-- **Wallet move:** a member moves their own **ROI** or **Income** wallet into their own **Deposit** wallet
+- **Wallet move:** a member moves their own **Compound ROI**, **FD ROI** or **Income** wallet into their own **Deposit** wallet
   (to reinvest). Deposit wallet cannot move back out except by investing or P2P.
 - Not a withdrawal: no daily-limit use, no admin approval, instant. Each move is two ledger rows:
   P2P sent / P2P received, Transfer out / Transfer in.

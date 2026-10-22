@@ -29,7 +29,7 @@ final class UserController
             'searchPlaceholder' => 'User ID, name or email',
             'columns' => [
                 'code' => 'User ID', 'name' => 'Name', 'sponsor' => 'Sponsor', 'joined' => 'Joined',
-                'invested' => 'Invested', 'wallets' => 'Dep / ROI / Income', 'status' => 'Status',
+                'invested' => 'Invested', 'wallets' => 'Dep / Comp ROI / FD ROI / Income', 'status' => 'Status',
             ],
             'rows' => array_map(static fn ($u) => [
                 'code' => [$u['user_code'], 'is-gold', url('/admin/user?id=' . $u['id'])],
@@ -37,7 +37,7 @@ final class UserController
                 'sponsor' => $u['sponsor_code'] ?? '—',
                 'joined' => fmt_date($u['created_at']),
                 'invested' => [money($u['invested']), 'num'],
-                'wallets' => [money($u['deposit_balance']) . ' / ' . money($u['roi_balance']) . ' / ' . money($u['income_balance']), 'num'],
+                'wallets' => [money($u['deposit_balance']) . ' / ' . money($u['roi_balance']) . ' / ' . money($u['fd_balance']) . ' / ' . money($u['income_balance']), 'num'],
                 'status' => match (true) {
                     (int) $u['is_blocked'] === 1 => ['Blocked', 'is-red'],
                     $u['activated_at'] !== null => ['Active', 'is-green'],
@@ -93,7 +93,7 @@ final class UserController
         $raw = input('amount');
         $note = input('note');
         try {
-            if (!in_array($wallet, ['deposit', 'roi', 'income'], true)) {
+            if (!isset(Ledger::WALLETS[$wallet])) {
                 throw new DomainException('Choose a wallet.');
             }
             if (!preg_match('/^-?\d{1,7}(\.\d{1,2})?$/', $raw) || (float) $raw == 0.0) {

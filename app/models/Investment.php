@@ -91,6 +91,42 @@ final class Investment
         return $part;
     }
 
+    /**
+     * Move pending principal parts into the Compound ROI wallet (withdraw from there). Principal drops $1 for $1.
+     *
+     * @throws DomainException
+     */
+    public static function release(int $userId, int $id, float $amount): void
+    {
+        $amount = round($amount, 2);
+        $inv = self::findForUser($userId, $id);
+        if ($inv === null || $inv['plan'] !== 'compound' || $inv['status'] !== 'Active') {
+            throw new DomainException('Plan not found or not active.');
+        }
+        if ($amount <= 0 || $amount > (float) $inv['pending'] + 0.001) {
+            throw new DomainException('Amount must be up to the pending ' . money($inv['pending']) . '.');
+        }
+        Database::transaction(static function () use ($inv, $amount, $userId): void {
+            $pending = round($inv['pending'] - $amount, 2);
+            $changed = Database::run(
+                'UPDATE investments SET pending = ?, principal = ?, latest_part = ? WHERE id = ? AND pending = ?',
+                [
+                    $pending,
+                    max(0, round($inv['principal'] - $amount, 2)),
+                    min((float) $inv['latest_part'], $pending), // older pending is used up first
+                    $inv['id'],
+                    $inv['pending'],
+                ]
+            )->rowCount();
+            if ($changed !== 1) {
+                throw new DomainException('Plan changed, please try again.');
+            }
+            $meta = ['ref_id' => (int) $inv['id'], 'note' => self::label($inv)];
+            Ledger::post($userId, 'plan', 'release', -$amount, $meta);
+            Ledger::post($userId, 'roi', 'release', $amount, $meta);
+        });
+    }
+
     /** Pay one day. Called by Payout::run() inside its transaction with the clock frozen. */
     public static function payDay(array $inv, string $date): void
     {
@@ -109,8 +145,9 @@ final class Investment
             Commission::onDailyPart($userId, $part, $id);
             $pending = round((float) $inv['pending'] + $part, 2);
             if ($final) {
-                // No compounding on the last day: principal + all pending is released.
-                Ledger::post($userId, 'roi', 'maturity', $principal + $pending, ['ref_id' => $id, 'note' => $note]);
+                // The invested amount is not returned: only pending parts + anything compounded on top of it.
+                $release = $pending + max(0.0, $principal - (float) $inv['amount']);
+                Ledger::post($userId, 'roi', 'maturity', $release, ['ref_id' => $id, 'note' => $note]);
                 self::update($id, ['pending' => 0, 'latest_part' => 0], $day, $date, true);
             } else {
                 self::update($id, ['pending' => $pending, 'latest_part' => $part], $day, $date, false);
@@ -122,7 +159,7 @@ final class Investment
         $accrued = round((float) $inv['accrued'] + $dayRoi, 2);
         Ledger::post($userId, 'plan', 'locked_roi', $dayRoi, ['ref_id' => $id, 'note' => $note]);
         if ($final) {
-            Ledger::post($userId, 'roi', 'maturity', $principal + $accrued, ['ref_id' => $id, 'note' => $note]);
+            Ledger::post($userId, 'fd', 'maturity', $principal + $accrued, ['ref_id' => $id, 'note' => $note]);
         }
         self::update($id, ['accrued' => $accrued], $day, $date, $final);
     }
@@ -139,9 +176,10 @@ final class Investment
         $rows = Database::all(
             "SELECT * FROM ledger WHERE user_id = ? AND (
                 (ref_id = ? AND type IN ('invest', 'profit', 'plan_part', 'locked_roi', 'maturity', 'compound', 'withdrawal'))
+                OR (ref_id = ? AND type = 'release' AND wallet = 'plan')
                 OR (type = 'refund' AND ref_id IN (SELECT id FROM withdrawals WHERE investment_id = ?))
              ) ORDER BY id", // insert order = the order the engine applied them (payout stamps can be backdated)
-            [$inv['user_id'], $id, $id]
+            [$inv['user_id'], $id, $id, $id]
         );
         // Plan withdrawal ledger rows and withdrawal requests are written 1:1, in the same order.
         $requests = Database::all('SELECT id, status FROM withdrawals WHERE investment_id = ? ORDER BY id', [$id]);
@@ -175,7 +213,9 @@ final class Investment
                 case 'maturity':
                     $row['roi'] += $a;
                     $principal = $held = 0.0;
-                    $row['detail'][] = 'matured, ' . money($a) . ' released to ROI wallet';
+                    $row['detail'][] = $inv['plan'] === 'compound'
+                        ? 'matured, invested principal closed, ' . money($a) . ' released to Compound ROI wallet'
+                        : 'matured, ' . money($a) . ' released to FD ROI wallet';
                     break;
                 case 'compound':
                     $principal += $a;
@@ -183,7 +223,14 @@ final class Investment
                     $row['event'] = 'Compounded';
                     $row['detail'][] = money($a) . ' moved from pending into principal';
                     break;
-                case 'withdrawal':
+                case 'release':
+                    $principal = max(0, $principal + $a);
+                    $held += $a;
+                    $row['roi'] -= $a;
+                    $row['event'] = 'Moved to Compound ROI wallet';
+                    $row['detail'][] = money(-$a) . ' taken from pending, principal down by the same';
+                    break;
+                case 'withdrawal': // requests made before pending moved to the wallet
                     $principal = max(0, $principal + $a);
                     $held += $a;
                     $w = array_shift($requests);
@@ -198,7 +245,7 @@ final class Investment
                         $row['detail'][] = $r['note'] . ', ' . money($a) . ' back into plan';
                     } else {
                         $row['roi'] += $a;
-                        $row['detail'][] = $r['note'] . ', plan had matured: ' . money($a) . ' to ROI wallet';
+                        $row['detail'][] = $r['note'] . ', plan had matured: ' . money($a) . ' to Compound ROI wallet';
                     }
                     break;
             }
@@ -256,11 +303,13 @@ final class Investment
         );
     }
 
-    /** @return array{active: int, invested: float, pending: float, compoundable: float, locked: float} */
+    /** @return array{active: int, invested: float, compound: float, fixed: float, pending: float, compoundable: float, locked: float} */
     public static function summary(int $userId): array
     {
         $row = Database::one(
-            "SELECT COUNT(*) AS active, COALESCE(SUM(amount), 0) AS invested, COALESCE(SUM(pending), 0) AS pending,
+            "SELECT COUNT(*) AS active, COALESCE(SUM(amount), 0) AS invested,
+                    COALESCE(SUM(CASE WHEN plan = 'compound' THEN amount ELSE 0 END), 0) AS compound,
+                    COALESCE(SUM(pending), 0) AS pending,
                     COALESCE(SUM(latest_part), 0) AS compoundable, COALESCE(SUM(accrued), 0) AS locked
              FROM investments WHERE user_id = ? AND status = 'Active'",
             [$userId]
@@ -268,6 +317,8 @@ final class Investment
         return [
             'active' => (int) $row['active'],
             'invested' => (float) $row['invested'],
+            'compound' => (float) $row['compound'],
+            'fixed' => (float) $row['invested'] - (float) $row['compound'],
             'pending' => (float) $row['pending'],
             'compoundable' => (float) $row['compoundable'],
             'locked' => (float) $row['locked'],

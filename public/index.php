@@ -51,6 +51,7 @@ $router->get('/login', [AuthController::class, 'showLogin'], 'guest');
 $router->post('/login', [AuthController::class, 'login'], 'guest');
 $router->get('/register', [AuthController::class, 'showRegister'], 'guest');
 $router->post('/register', [AuthController::class, 'register'], 'guest');
+$router->get('/register/sponsor', [AuthController::class, 'sponsorLookup'], 'guest');
 $router->get('/forgot-password', [AuthController::class, 'forgot'], 'guest');
 $router->post('/logout', [AuthController::class, 'logout'], 'any');
 
@@ -69,7 +70,7 @@ $router->get('/my-packages', [PackageController::class, 'mine']);
 $router->get('/compound-packages', [PackageController::class, 'compound']);
 $router->get('/investment', [PackageController::class, 'history']);
 $router->post('/investments/compound',[PackageController::class, 'compoundPart']);
-$router->post('/investments/withdraw', [PackageController::class, 'withdrawPending']);
+$router->post('/investments/release', [PackageController::class, 'releasePending']);
 $router->get('/calculator', [PackageController::class, 'calculator']);
 
 $router->get('/direct-team', [TeamController::class, 'direct']);

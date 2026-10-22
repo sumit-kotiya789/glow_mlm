@@ -97,7 +97,7 @@ final class FinanceController
             'rows' => array_map(static fn ($r) => [
                 'date' => fmt_date($r['created_at'], 'd-M-Y H:i'),
                 'user' => [$r['user_code'], '', url('/admin/user?id=' . $r['user_id'])],
-                'wallet' => ucfirst($r['wallet']),
+                'wallet' => Ledger::WALLETS[$r['wallet']] ?? ucfirst($r['wallet']),
                 'type' => Ledger::TYPES[$r['type']] ?? $r['type'],
                 'amount' => [money($r['amount']), 'num ' . ((float) $r['amount'] < 0 ? 'is-red' : 'is-green')],
                 'from' => $r['from_code'] ? $r['from_code'] . ' · L' . $r['level'] : '—',

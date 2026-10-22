@@ -8,6 +8,7 @@ $fields = [
     ['sponsor_code', 'Sponsor ID *', 'text', [
         'pattern' => '[Gg][Ll][0-9]{7}', 'maxlength' => 9, 'autocapitalize' => 'characters', 'autocomplete' => 'off',
         'data-invalid' => 'Sponsor ID looks like GL0000001.',
+        'data-lookup' => url('/register/sponsor'), 'data-lookup-label' => 'Sponsor', 'data-lookup-popup' => '',
     ]],
     ['name', 'Full Name *', 'text', ['minlength' => 2, 'maxlength' => 80, 'autocomplete' => 'name',
         'data-invalid' => 'Enter your full name (2-80 characters).']],
@@ -55,6 +56,9 @@ $sponsorDefault = isset($_GET['ref']) && is_string($_GET['ref']) ? strtoupper($_
                            aria-describedby="err-<?= e($name) ?>"<?= invalid_attr($name) ?><?= $attrHtml ?>>
                 <?php endif ?>
                 <label for="<?= e($name) ?>"><?= e($label) ?></label>
+                <?php if ($name === 'sponsor_code') : ?>
+                    <p class="field__hint float-field__hint" data-lookup-out aria-live="polite">Enter the ID to see your sponsor's name.</p>
+                <?php endif ?>
                 <?= field_error($name) ?>
             </div>
         <?php endforeach ?>

@@ -26,8 +26,15 @@ $neon = !str_starts_with(current_path(), '/admin'); // admin login keeps the cla
 <main id="main" class="guest-main">
 <?= $content ?>
 </main>
+<?php if ($neon) {
+    partial('notice');
+} ?>
 <?php partial('toast') ?>
 <script src="<?= e(asset('js/toast.js')) ?>" defer></script>
+<script src="<?= e(asset('js/notice.js')) ?>" defer></script>
+<?php foreach ($scripts ?? [] as $script) : ?>
+<script src="<?= e(asset($script)) ?>" defer></script>
+<?php endforeach ?>
 <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </body>
 </html>

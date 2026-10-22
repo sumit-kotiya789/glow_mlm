@@ -11,12 +11,12 @@ use DomainException;
  * Internal fund moves. Rules: docs/RULES.md section 9a.
  *  - P2P: Deposit wallet -> another member's Deposit wallet, by user ID.
  *    Only members with at least one approved deposit may send (blocks signup-bonus farming).
- *  - Wallet move: own ROI / Income wallet -> own Deposit wallet.
+ *  - Wallet move: own Compound ROI / FD ROI / Income wallet -> own Deposit wallet.
  * No fee. Every move is two ledger rows written in one transaction.
  */
 final class Transfer
 {
-    public const SOURCES = ['roi' => 'ROI Wallet', 'income' => 'Income Wallet'];
+    public const SOURCES = ['roi' => Ledger::WALLETS['roi'], 'fd' => Ledger::WALLETS['fd'], 'income' => Ledger::WALLETS['income']];
 
     /** Ledger types written by this class (the Transfer History page). */
     public const TYPES = ['p2p_out', 'p2p_in', 'wallet_out', 'wallet_in'];
@@ -79,16 +79,6 @@ final class Transfer
         return $to;
     }
 
-    /** "Rahul Kumar" -> "Ra*** Ku***" (enough to recognise the person, not enough to leak the name). */
-    public static function maskName(string $name): string
-    {
-        $words = preg_split('/\s+/u', trim($name)) ?: [];
-        return implode(' ', array_map(
-            static fn (string $w): string => mb_substr($w, 0, 2) . '***',
-            array_filter($words, static fn (string $w): bool => $w !== '')
-        ));
-    }
-
     /**
      * Send from the sender's Deposit wallet to the receiver's Deposit wallet.
      *
@@ -113,10 +103,10 @@ final class Transfer
             if ($amount > $sendable + 0.001) {
                 throw new DomainException('You can send up to ' . money($sendable) . '. The signup bonus can be invested but not sent.');
             }
-            Ledger::post($senderId, 'deposit', 'p2p_out', -$amount, ['note' => 'Sent to ' . $to['user_code']]);
+            Ledger::post($senderId, 'deposit', 'p2p_out', -$amount, ['note' => 'Sent to ' . $to['user_code'] . ' · ' . $to['name']]);
             Ledger::post((int) $to['id'], 'deposit', 'p2p_in', $amount, [
                 'from_user_id' => $senderId,
-                'note' => 'Received from ' . $from['user_code'],
+                'note' => 'Received from ' . $from['user_code'] . ' · ' . $from['name'],
             ]);
         });
         return $to;

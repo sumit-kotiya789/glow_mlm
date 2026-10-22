@@ -31,7 +31,7 @@ final class DashboardController
                 ['label' => 'Active Investment', 'value' => money($num("SELECT COALESCE(SUM(amount), 0) FROM investments WHERE status = 'Active'")), 'tone' => 'gold'],
                 ['label' => 'Deposits Approved', 'value' => money($num("SELECT COALESCE(SUM(amount), 0) FROM deposits WHERE status = 'Approved'")), 'tone' => 'green'],
                 ['label' => 'Withdrawals Paid', 'value' => money($num("SELECT COALESCE(SUM(net_amount), 0) FROM withdrawals WHERE status = 'Paid'")), 'tone' => 'amber'],
-                ['label' => 'Member Wallets Total', 'value' => money($num('SELECT COALESCE(SUM(deposit_balance + roi_balance + income_balance), 0) FROM users')), 'tone' => 'muted'],
+                ['label' => 'Member Wallets Total', 'value' => money($num('SELECT COALESCE(SUM(deposit_balance + roi_balance + fd_balance + income_balance), 0) FROM users')), 'tone' => 'muted'],
             ],
             'queues' => [
                 ['/admin/deposits', 'Pending deposits', $pendingDeposits, money($num("SELECT COALESCE(SUM(amount), 0) FROM deposits WHERE status = 'Pending'")), 'dollar'],

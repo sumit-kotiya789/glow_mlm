@@ -48,6 +48,9 @@
         if (el.validity.valueMissing) {
             return el.dataset.required || 'This field is required.';
         }
+        if (el.validity.customError) {
+            return el.validationMessage; // e.g. "Sponsor ID not found" from js/lookup.js
+        }
         return el.dataset.invalid || el.validationMessage;
     };
 

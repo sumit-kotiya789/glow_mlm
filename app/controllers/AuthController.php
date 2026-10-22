@@ -42,7 +42,7 @@ final class AuthController
 
     public function showRegister(): void
     {
-        view('register', ['title' => 'Register', 'countries' => countries()], 'guest');
+        view('register', ['title' => 'Register', 'countries' => countries(), 'scripts' => ['js/lookup.js']], 'guest');
     }
 
     public function register(): void
@@ -100,9 +100,27 @@ final class AuthController
             return [$code, User::grantSignupBonus((int) User::findByCode($code)['id'])];
         });
         flash('old', ['user_code' => $code]);
-        toast('Account created. Your User ID is ' . $code
-            . ($bonus ? '. Welcome bonus ' . money(Setting::num('signup_bonus_amount')) . ' added to your Deposit wallet.' : ''));
+        notice('Congratulations!', 'Your account is ready. Save your User ID, you need it to log in.', [
+            'User ID' => $code,
+            'Name' => $data['name'],
+            'Email' => strtolower($data['email']),
+            'Mobile' => $data['mobile'],
+            'Country' => $data['country'],
+            'Sponsor' => $sponsor['user_code'] . ' · ' . $sponsor['name'],
+        ] + ($bonus ? ['Welcome bonus' => money(Setting::num('signup_bonus_amount')) . ' in Deposit wallet'] : []));
         redirect('/login');
+    }
+
+    /** JSON for the register form: name behind a sponsor ID. */
+    public function sponsorLookup(): void
+    {
+        header('Content-Type: application/json');
+        header('Cache-Control: no-store');
+        $code = strtoupper(trim((string) ($_GET['code'] ?? '')));
+        $sponsor = preg_match('/^GL\d{7}$/', $code) ? User::findByCode($code) : null;
+        echo json_encode($sponsor === null || (int) $sponsor['is_blocked'] === 1
+            ? ['ok' => false, 'message' => 'Sponsor ID ' . $code . ' not found. Check the ID and try again.']
+            : ['ok' => true, 'code' => $sponsor['user_code'], 'name' => $sponsor['name']]);
     }
 
     public function forgot(): void

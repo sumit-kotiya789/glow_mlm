@@ -7,7 +7,6 @@ namespace App\Controllers;
 use App\Auth;
 use App\Database;
 use App\Models\Investment;
-use App\Models\Ledger;
 use App\Models\PlanTerm;
 use App\Models\TradePair;
 use App\Services\Salary;
@@ -33,12 +32,14 @@ final class DashboardController
             'bodyClass' => 'page-mint',
             'user' => $user,
             'stats' => [
-                ['label' => 'Total Investment', 'value' => money($summary['invested']), 'tone' => 'gold'],
+                ['label' => 'Compound Investment', 'value' => money($summary['compound']), 'tone' => 'gold'],
+                ['label' => 'FD Investment', 'value' => money($summary['fixed']), 'tone' => 'gold'],
                 ['label' => 'Deposit Wallet', 'value' => money($user['deposit_balance']), 'tone' => 'muted'],
-                ['label' => 'ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green'],
+                ['label' => 'Compound ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green'],
+                ['label' => 'FD ROI Wallet', 'value' => money($user['fd_balance']), 'tone' => 'cyan',
+                    'hint' => 'Locked in running FD: ' . money($summary['locked'])],
                 ['label' => 'Income Wallet', 'value' => money($user['income_balance']), 'tone' => 'amber'],
             ],
-            'returns' => Ledger::returnCards($userId),
             'salary' => Salary::progress($user),
             'referral' => self::referralLink($user['user_code']),
             'terms' => PlanTerm::all(),

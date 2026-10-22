@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Database;
 use App\Models\Ledger;
 use App\Models\Setting;
 use App\Models\User;
@@ -20,7 +21,7 @@ final class Commission
     public static function onInvest(int $investorId, float $amount, int $investmentId): void
     {
         foreach (self::uplines($investorId) as $level => $upline) {
-            if ($upline['is_blocked']) {
+            if (!self::earns($upline, $level)) {
                 continue;
             }
             $direct = $level === 1;
@@ -38,7 +39,7 @@ final class Commission
     {
         $pcts = Setting::roiLevels();
         foreach (self::uplines($investorId) as $level => $upline) {
-            if ($upline['is_blocked']) {
+            if (!self::earns($upline, $level)) {
                 continue;
             }
             Ledger::post((int) $upline['id'], 'income', 'roi_on_roi', $part * $pcts[$level - 1] / 100, [
@@ -48,6 +49,24 @@ final class Commission
                 'note' => pct($pcts[$level - 1]) . ' of ' . money($part) . ' daily part',
             ]);
         }
+    }
+
+    /**
+     * An upline earns level N income only while not blocked, with a running plan of their own and at
+     * least N active directs (active = has a running plan). Income they miss is not passed further up.
+     */
+    private static function earns(array $upline, int $level): bool
+    {
+        if ((int) $upline['is_blocked'] === 1) {
+            return false;
+        }
+        $row = Database::one(
+            "SELECT EXISTS(SELECT 1 FROM investments WHERE user_id = ? AND status = 'Active') AS active,
+                    (SELECT COUNT(DISTINCT u.id) FROM users u JOIN investments i ON i.user_id = u.id AND i.status = 'Active'
+                      WHERE u.sponsor_id = ?) AS directs",
+            [$upline['id'], $upline['id']]
+        );
+        return (int) $row['active'] === 1 && (int) $row['directs'] >= $level;
     }
 
     /** @return array<int, array<string, mixed>> */

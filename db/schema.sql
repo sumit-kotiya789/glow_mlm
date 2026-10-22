@@ -38,6 +38,7 @@ CREATE TABLE users (
     txn_locked_until DATETIME NULL,
     deposit_balance DECIMAL(14,2) NOT NULL DEFAULT 0,
     roi_balance DECIMAL(14,2) NOT NULL DEFAULT 0,
+    fd_balance DECIMAL(14,2) NOT NULL DEFAULT 0,
     income_balance DECIMAL(14,2) NOT NULL DEFAULT 0,
     activated_at DATETIME NULL,
     signup_bonus_paid INT NOT NULL DEFAULT 0,
@@ -108,7 +109,7 @@ CREATE TABLE investments (
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
--- source: 'roi', 'income' or 'plan' (pending principal of investment_id).
+-- source: 'roi' (Compound ROI), 'fd' (FD ROI), 'income' or 'plan' (pending principal of investment_id).
 CREATE TABLE withdrawals (
     id {{AUTO_ID}},
     user_id INT NOT NULL,
@@ -127,7 +128,7 @@ CREATE TABLE withdrawals (
     FOREIGN KEY (investment_id) REFERENCES investments (id)
 );
 
--- Every balance movement. wallet: deposit | roi | income | plan (plan = no wallet balance).
+-- Every balance movement. wallet: deposit | roi (Compound ROI) | fd (FD ROI) | income | plan (plan = no wallet balance).
 -- amount is signed: + credit, - debit.
 CREATE TABLE ledger (
     id {{AUTO_ID}},

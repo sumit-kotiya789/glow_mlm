@@ -101,16 +101,18 @@ fund($a, 200);
 fund($d, 200);
 fund($e, 200);
 
-echo "-- Investing: direct 10% + level 0.25%\n";
+echo "-- Investing: direct 10% + level 1%, only to uplines with a running plan and N active directs for level N\n";
 freeze_clock(day(0) . ' 10:00:00');
 $bPlan = Investment::open($b, 'compound', 25, 100);
 check('B deposit wallet after invest', 215.0, bal($b, 'deposit'));
-check('A direct income from B (10%)', 10.0, bal($a, 'income'));
+check('A has no running plan: no direct income from B', 0.0, bal($a, 'income'));
 $cPlan = Investment::open($c, 'compound', 25, 100);
-check('B direct income from C', 10.0, bal($b, 'income'));
-check('A level-2 income from C (0.25%)', 10.25, bal($a, 'income'));
+check('B direct income from C (10%)', 10.0, bal($b, 'income'));
 $dPlan = Investment::open($d, 'compound', 25, 100);
+check('C direct income from D', 10.0, bal($c, 'income'));
+check('B level-2 from D skipped: 1 active direct, needs 2', 10.0, bal($b, 'income'));
 $ePlan = Investment::open($e, 'fixed', 25, 100);
+check('A still inactive: nothing from E', 0.0, bal($a, 'income'));
 throws('below minimum', fn () => Investment::open($b, 'compound', 25, 4));
 throws('above maximum', fn () => Investment::open($b, 'compound', 25, 1001));
 throws('more than deposit wallet', fn () => Investment::open($b, 'compound', 25, 500));
@@ -119,15 +121,20 @@ check('B activated', true, User::find($b)['activated_at'] !== null);
 echo "-- Salary qualification (self >= 50, 1 direct, 1 level-2 for this test)\n";
 Investment::open($a, 'fixed', 100, 50);
 check('A qualified', true, User::find($a)['salary_qualified_at'] !== null);
+
+echo "-- A active now with 2 active directs (B, E): level-2 income\n";
+$aIncome = bal($a, 'income');
+Investment::open($c, 'fixed', 25, 10);
+check('A level-2 1% of C 10', $aIncome + 0.1, bal($a, 'income'));
 freeze_clock(null);
 
 echo "-- Day 1: 5% = 4% part + 1% profit, ROI-on-ROI\n";
 $aIncome = bal($a, 'income');
 Payout::run(day(1));
-check('B profit to ROI wallet', 1.0, bal($b, 'roi'));
+check('B profit to Compound ROI wallet', 1.0, bal($b, 'roi'));
 check('B pending', 4.0, (float) inv($bPlan)['pending']);
 check('B latest part', 4.0, (float) inv($bPlan)['latest_part']);
-check('A ROI-on-ROI: L1 10% of B 4 + L2 5% of C 4 + L3 3% of D 4', $aIncome + 0.40 + 0.20 + 0.12, bal($a, 'income'));
+check('A ROI-on-ROI: L1 5% of B 4 + L2 1% of C 4, L3 from D skipped (2 active directs)', $aIncome + 0.20 + 0.04, bal($a, 'income'));
 check('same date pays once', null, Payout::run(day(1)));
 
 echo "-- Compound -> 104 (example from rules)\n";
@@ -136,19 +143,18 @@ check('B principal', 104.0, (float) inv($bPlan)['principal']);
 check('B pending', 0.0, (float) inv($bPlan)['pending']);
 throws('compound twice', fn () => Investment::compound($b, $bPlan));
 
-echo "-- Day 2: withdraw the part -> 99.84\n";
+echo "-- Day 2: move the part to the Compound ROI wallet -> 99.84\n";
 Payout::run(day(2));
 check('B part on 104', 4.16, (float) inv($bPlan)['latest_part']);
 check('B profit on 104', 1.0 + 1.04, bal($b, 'roi'));
 freeze_clock(day(2) . ' 12:00:00');
-$w = Withdrawal::request($b, 'plan', 4.16, $bPlan);
-check('B principal after withdraw', 99.84, (float) inv($bPlan)['principal']);
-check('B pending after withdraw', 0.0, (float) inv($bPlan)['pending']);
-throws('more than pending', fn () => Withdrawal::request($b, 'plan', 1, $bPlan));
-Withdrawal::reject($w, 'test');
-check('reject restores principal', 104.0, (float) inv($bPlan)['principal']);
-check('reject restores pending', 4.16, (float) inv($bPlan)['pending']);
-Withdrawal::request($b, 'plan', 4.16, $bPlan);
+Investment::release($b, $bPlan, 4.16);
+check('B principal after move', 99.84, (float) inv($bPlan)['principal']);
+check('B pending after move', 0.0, (float) inv($bPlan)['pending']);
+check('B part lands in Compound ROI wallet', 2.04 + 4.16, bal($b, 'roi'));
+check('no withdrawal request created', 0, (int) Database::value('SELECT COUNT(*) FROM withdrawals WHERE user_id = ?', [$b]));
+throws('more than pending', fn () => Investment::release($b, $bPlan, 1));
+throws('plan source no longer requestable', fn () => Withdrawal::request($b, 'plan', 1));
 freeze_clock(null);
 
 echo "-- D does nothing for 3 days: pending 12, only latest 4 compoundable\n";
@@ -156,8 +162,8 @@ Payout::run(day(3));
 check('D pending after 3 days', 12.0, (float) inv($dPlan)['pending']);
 check('D latest part', 4.0, (float) inv($dPlan)['latest_part']);
 freeze_clock(day(3) . ' 12:00:00');
-Withdrawal::request($d, 'plan', 12, $dPlan);
-check('D withdraw 12 -> principal 88', 88.0, (float) inv($dPlan)['principal']);
+Investment::release($d, $dPlan, 12);
+check('D move 12 -> principal 88', 88.0, (float) inv($dPlan)['principal']);
 freeze_clock(null);
 check('C pending 12 before compound', 12.0, (float) inv($cPlan)['pending']);
 Investment::compound($c, $cPlan);
@@ -172,8 +178,8 @@ foreach (['B' => $bPlan, 'C' => $cPlan, 'D' => $dPlan] as $who => $planId) {
     check("$who history pending", (float) inv($planId)['pending'], $last['held']);
 }
 $bEvents = array_column(Investment::history(inv($bPlan)), 'event');
-check('B history events', ['Invested', 'Payout day 1/25', 'Compounded', 'Payout day 2/25', 'Withdrawal #' . $w . ' · Rejected',
-    'Withdrawal refund', 'Withdrawal #' . ($w + 1) . ' · Pending', 'Payout day 3/25'], $bEvents);
+check('B history events', ['Invested', 'Payout day 1/25', 'Compounded', 'Payout day 2/25', 'Moved to Compound ROI wallet',
+    'Payout day 3/25'], $bEvents);
 
 echo "-- Withdrawal limits\n";
 freeze_clock(day(3) . ' 13:00:00');
@@ -192,11 +198,19 @@ for ($n = 4; $n <= 25; $n++) {
     Payout::run(day($n));
 }
 check('E fixed matured', 'Matured', inv($ePlan)['status']);
-check('E fixed pays 100 + 25 x 5', 225.0, bal($e, 'roi') - (float) Database::value(
-    "SELECT COALESCE(SUM(amount), 0) FROM ledger WHERE user_id = ? AND wallet = 'roi' AND ref_id <> ?", [$e, $ePlan]
-));
+check('E fixed pays 100 + 25 x 5 to FD ROI wallet', 225.0, bal($e, 'fd'));
 check('B compound matured', 'Matured', inv($bPlan)['status']);
 check('B pending cleared at maturity', 0.0, (float) inv($bPlan)['pending']);
+$maturity = fn (int $planId) => (float) Database::value("SELECT amount FROM ledger WHERE type = 'maturity' AND ref_id = ?", [$planId]);
+check('D compound maturity: invested 100 not returned, only pending 22 x 3.52', 77.44, $maturity($dPlan));
+check('C compound maturity: pending 8 + 22 x 4.16 + compounded 4', 103.52, $maturity($cPlan));
+check('compound maturity goes to Compound ROI wallet', 'roi', Database::value("SELECT wallet FROM ledger WHERE type = 'maturity' AND ref_id = ?", [$cPlan]));
+freeze_clock(day(25) . ' 12:00:00');
+$fdW = Withdrawal::request($e, 'fd', 1);
+check('withdraw from FD ROI wallet', 224.0, bal($e, 'fd'));
+Withdrawal::reject($fdW, 'test');
+check('rejected FD withdrawal refunds FD ROI wallet', 225.0, bal($e, 'fd'));
+freeze_clock(null);
 $eHistory = Investment::history(inv($ePlan));
 check('E fixed history: invest + 25 payouts', 26, count($eHistory));
 check('E fixed history paid to ROI', 225.0, array_sum(array_column($eHistory, 'roi')));
@@ -250,19 +264,20 @@ Transfer::p2p($p, 'gl0000011', 40);   // lower-case ID is accepted
 check('sender deposit debited', 60.0, bal($p, 'deposit'));
 check('receiver deposit credited', $qBefore + 40, bal($q, 'deposit'));
 check('receiver ledger from sender', $p, (int) Database::value("SELECT from_user_id FROM ledger WHERE user_id = ? AND type = 'p2p_in'", [$q]));
-check('mask name', 'Ra*** Ku***', Transfer::maskName('Rahul Kumar'));
 User::setBlocked($r, true);
 throws('blocked receiver', fn () => Transfer::p2p($p, 'GL0000012', 5));
 User::setBlocked($r, false);
-Database::run('UPDATE users SET roi_balance = 30, income_balance = 20 WHERE id = ?', [$p]);
+Database::run('UPDATE users SET roi_balance = 30, fd_balance = 15, income_balance = 20 WHERE id = ?', [$p]);
 Transfer::toDeposit($p, 'roi', 30);
+Transfer::toDeposit($p, 'fd', 15);
 Transfer::toDeposit($p, 'income', 20);
 check('roi emptied', 0.0, bal($p, 'roi'));
+check('fd emptied', 0.0, bal($p, 'fd'));
 check('income emptied', 0.0, bal($p, 'income'));
-check('deposit after moves', 110.0, bal($p, 'deposit'));
+check('deposit after moves', 125.0, bal($p, 'deposit'));
 throws('roi overdraw', fn () => Transfer::toDeposit($p, 'roi', 1));
 throws('bad source', fn () => Transfer::toDeposit($p, 'plan', 1));
-check('transfer history rows (p)', 5, Transfer::history($p, 1)['total']);
+check('transfer history rows (p)', 7, Transfer::history($p, 1)['total']);
 
 echo "-- Signup bonus cannot be sent\n";
 Setting::set('signup_bonus_enabled', '1');
@@ -325,14 +340,20 @@ $fid = Investment::open($u, 'fixed', 25, 10);
 Ledger::post($u, 'roi', 'profit', 0.1, ['ref_id' => $cid]);
 Ledger::post($u, 'roi', 'profit', 0.1, ['ref_id' => $cid]);
 Ledger::post($u, 'roi', 'maturity', 20.0, ['ref_id' => $cid]);
-Ledger::post($u, 'roi', 'maturity', 22.5, ['ref_id' => $fid]);
+Ledger::post($u, 'fd', 'maturity', 22.5, ['ref_id' => $fid]);
 $split = Ledger::roiReturns($u);
 check('compound returns = profit + maturity', 20.2, $split['compound']);
 check('fixed returns = maturity incl. principal', 22.5, $split['fixed']);
-Ledger::post($u, 'income', 'direct', 3.0);
+$before = inv($cid);
+$old = Database::insert('withdrawals', ['user_id' => $u, 'source' => 'plan', 'investment_id' => $cid, 'amount' => 2, 'fee' => 0,
+    'net_amount' => 2, 'wallet' => '0x0', 'status' => 'Pending', 'created_at' => now()]);
+Withdrawal::reject($old, 'test');
+check('old plan withdrawal rejected: back into pending', (float) $before['pending'] + 2, (float) inv($cid)['pending']);
+check('old plan withdrawal rejected: back into principal', (float) $before['principal'] + 2, (float) inv($cid)['principal']);
 $cards = Ledger::returnCards($u);
-check('3 boxes', 3, count($cards));
-check('combined = fixed + compound + income wallet', '$45.70', $cards[2]['value']);
+check('2 separate boxes, no combined', 2, count($cards));
+check('compound box', '$20.20', $cards[0]['value']);
+check('FD box', '$22.50', $cards[1]['value']);
 
 check('BscScan link for a valid hash', 'https://bscscan.com/tx/0x' . str_repeat('a', 64), bscscan_cell('0x' . str_repeat('a', 64))[2]);
 check('no BscScan link without a hash', '—', bscscan_cell(null));

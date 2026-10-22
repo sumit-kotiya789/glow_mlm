@@ -1,7 +1,7 @@
 <?php /** @var string $title @var string $theme classic|neon */ $theme = $theme ?? 'classic'; ?>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="<?= $theme === 'neon' ? '#04090a' : '#0a1020' ?>">
+<meta name="theme-color" content="<?= $theme === 'neon' ? '#0a0805' : '#0a1020' ?>">
 <meta name="robots" content="noindex">
 <title><?= e($title ?? 'GLOW') ?> · GLOW</title>
 <link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">

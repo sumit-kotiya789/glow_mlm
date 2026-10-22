@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Auth;
-use App\Database;
 use App\Models\Deposit;
 use App\Models\Investment;
 use App\Models\Ledger;
@@ -33,21 +32,21 @@ final class WalletController
     public function wallet(): void
     {
         $user = Auth::user();
-        $tabs = ['all' => 'All', 'deposit' => 'Deposit', 'roi' => 'ROI', 'income' => 'Income'];
+        $tabs = ['all' => 'All', 'deposit' => 'Deposit', 'roi' => 'Compound ROI', 'fd' => 'FD ROI', 'income' => 'Income'];
         $wallet = query_choice('wallet', array_keys($tabs), 'all');
         $pager = Ledger::paginateWallet((int) $user['id'], $wallet === 'all' ? null : $wallet, page_param());
         view('list', [
             'title' => 'My Wallet',
             'heading' => 'My Wallet',
-            'subtitle' => 'Deposit wallet is for investing. ROI and Income wallets can be withdrawn.',
+            'subtitle' => 'Deposit wallet is for investing. Compound ROI, FD ROI and Income wallets can be withdrawn.',
             'icon' => 'wallet',
             'summary' => [
                 ['label' => 'Deposit Wallet', 'value' => money($user['deposit_balance']), 'tone' => 'cyan'],
-                ['label' => 'ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green'],
+                ['label' => 'Compound ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green'],
+                ['label' => 'FD ROI Wallet', 'value' => money($user['fd_balance']), 'tone' => 'cyan'],
                 ['label' => 'Income Wallet', 'value' => money($user['income_balance']), 'tone' => 'gold'],
-                ['label' => 'Total', 'value' => money($user['deposit_balance'] + $user['roi_balance'] + $user['income_balance']), 'tone' => 'muted'],
             ],
-            'returns' => in_array($wallet, ['all', 'roi'], true) ? Ledger::returnCards((int) $user['id']) : [],
+            'returns' => in_array($wallet, ['all', 'roi', 'fd'], true) ? Ledger::returnCards((int) $user['id']) : [],
             'tabs' => filter_tabs('/wallet', $tabs, $wallet, 'wallet'),
             'columns' => ['date' => 'Date', 'wallet' => 'Wallet', 'type' => 'Type', 'plan' => 'Plan', 'note' => 'Detail', 'amount' => 'Amount'],
             'rows' => array_map(static fn($r) => [
@@ -94,8 +93,12 @@ final class WalletController
         if ($errors) {
             fail('/deposit', $errors);
         }
-        Deposit::submit((int) Auth::id(), (float) $raw, $hash);
-        toast('Deposit of ' . money($raw) . ' submitted. It will be credited after admin approval.');
+        $id = Deposit::submit((int) Auth::id(), (float) $raw, $hash);
+        notice('Deposit Submitted', 'It will be credited to your Deposit wallet after admin approval.', [
+            'Request' => '#' . $id . ' · Pending',
+            'Amount' => money($raw),
+            'Tx hash' => substr($hash, 0, 10) . '…' . substr($hash, -6),
+        ]);
         redirect('/deposit');
     }
 
@@ -136,7 +139,7 @@ final class WalletController
         $source = input('source');
         $raw = input('amount');
         $errors = [];
-        if (!in_array($source, ['roi', 'income'], true)) {
+        if ($source === 'plan' || !isset(Withdrawal::SOURCES[$source])) {
             $errors['source'] = 'Choose a wallet.';
         }
         if (!preg_match('/^\d{1,7}(\.\d{1,2})?$/', $raw)) {
@@ -159,8 +162,7 @@ final class WalletController
         if ($errors) {
             fail('/withdrawal', $errors);
         }
-        $w = Database::one('SELECT fee, net_amount FROM withdrawals WHERE id = ?', [$id]);
-        toast('Withdrawal #' . $id . ' requested: ' . money($raw) . ', fee ' . money($w['fee']) . ', you get ' . money($w['net_amount']) . '. Admin will send it manually.');
+        notice('Withdrawal Requested', 'Admin will send it to your wallet manually.', PackageController::withdrawalRows($id));
         redirect('/withdrawal');
     }
 
@@ -199,7 +201,7 @@ final class WalletController
             'canSend' => Transfer::canSend($userId),
             'sendable' => Transfer::sendable($userId),
             'recent' => $this->transferRows(Transfer::history($userId, 1, 5)['rows']),
-            'scripts' => ['js/transfer.js'],
+            'scripts' => ['js/lookup.js'],
         ]);
     }
 
@@ -229,7 +231,13 @@ final class WalletController
         if ($errors) {
             fail('/transfer', $errors);
         }
-        toast(money($raw) . ' sent to ' . $to['user_code'] . ' (' . Transfer::maskName($to['name']) . ').');
+        notice('Transfer Successful', money($raw) . ' is now in ' . $to['name'] . '\'s Deposit wallet.', [
+            'Receiver' => $to['name'],
+            'User ID' => $to['user_code'],
+            'Amount' => money($raw),
+            'Fee' => money(0),
+            'Your Deposit wallet' => money(User::find((int) Auth::id())['deposit_balance']),
+        ]);
         redirect('/transfer');
     }
 
@@ -262,18 +270,24 @@ final class WalletController
         if ($errors) {
             fail('/transfer', $errors);
         }
-        toast(money($raw) . ' moved from ' . Transfer::SOURCES[$source] . ' to your Deposit wallet.');
+        $user = User::find((int) Auth::id());
+        notice('Moved to Deposit Wallet', 'You can invest it now.', [
+            'From' => Transfer::SOURCES[$source],
+            'Amount' => money($raw),
+            Transfer::SOURCES[$source] . ' left' => money($user[$source . '_balance']),
+            'Deposit wallet now' => money($user['deposit_balance']),
+        ]);
         redirect('/transfer');
     }
 
-    /** JSON for the receiver check on the P2P form: masked name of a User ID. */
+    /** JSON for the receiver check on the P2P form: name behind a User ID. */
     public function lookupUser(): void
     {
         header('Content-Type: application/json');
         header('Cache-Control: no-store');
         try {
             $to = Transfer::receiver((int) Auth::id(), (string) ($_GET['code'] ?? ''));
-            echo json_encode(['ok' => true, 'code' => $to['user_code'], 'name' => Transfer::maskName($to['name'])]);
+            echo json_encode(['ok' => true, 'code' => $to['user_code'], 'name' => $to['name']]);
         } catch (DomainException $e) {
             echo json_encode(['ok' => false, 'message' => $e->getMessage()]);
         }
@@ -336,11 +350,10 @@ final class WalletController
 
     private function transferRows(array $rows): array
     {
-        $wallets = ['deposit' => 'Deposit', 'roi' => 'ROI', 'income' => 'Income'];
         return array_map(static fn($r) => [
             'date' => fmt_date($r['created_at'], 'd-M-Y H:i'),
             'type' => Ledger::TYPES[$r['type']] ?? $r['type'],
-            'wallet' => $wallets[$r['wallet']] ?? $r['wallet'],
+            'wallet' => Ledger::WALLETS[$r['wallet']] ?? $r['wallet'],
             'note' => $r['note'] ?: '—',
             'amount' => $r['amount'] >= 0
                 ? ['+' . money($r['amount']), 'num is-green']

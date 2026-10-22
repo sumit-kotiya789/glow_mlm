@@ -16,8 +16,8 @@ use App\Models\PlanTerm;
 $oldPlan = old('plan', 'compound');
 $oldDays = (int) old('days', (string) $selectedDays);
 $plans = [
-    'compound' => ['Compound', 'layers', 'Daily 4% principal part: compound the latest day or withdraw it. 1% profit goes to your ROI wallet every day.'],
-    'fixed' => ['Fixed Deposit', 'box', 'Locked for the whole term. Principal + all daily ROI is paid to your ROI wallet at maturity.'],
+    'compound' => ['Compound', 'layers', 'Daily 4% principal part: compound the latest day or move it to your Compound ROI wallet. 1% profit goes to your Compound ROI wallet every day.'],
+    'fixed' => ['Fixed Deposit', 'box', 'Locked for the whole term. Principal + all daily ROI is paid to your FD ROI wallet at maturity.'],
 ];
 ?>
 <?php partial('page-head', ['heading' => 'Package Details', 'subtitle' => 'Choose a plan, a term and an amount. Paid from your Deposit wallet.', 'icon' => 'zap']) ?>
@@ -94,9 +94,10 @@ $plans = [
         ]) ?>
         <ol class="how-list">
             <li><strong>Compound:</strong> each day you can compound only the latest 4% part (principal goes up) or
-                withdraw any pending part (principal goes down).</li>
-            <li><strong>Fixed Deposit:</strong> nothing moves until maturity, then everything is released.</li>
-            <li>At the end of the term, principal and all pending go to your ROI wallet.</li>
+                move any pending part to your Compound ROI wallet (principal goes down) and withdraw it from there.</li>
+            <li><strong>Fixed Deposit:</strong> nothing moves until maturity, then principal + all ROI go to your FD ROI wallet.</li>
+            <li><strong>Compound maturity:</strong> the amount you invested is not returned. All pending parts (and anything
+                you compounded on top) go to your Compound ROI wallet.</li>
         </ol>
     </section>
 </div>

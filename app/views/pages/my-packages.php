@@ -52,7 +52,7 @@ $back = $compoundOnly ? '/compound-packages' : '/my-packages';
                     </div>
                     <?php if ($compound): ?>
                         <div>
-                            <dt>Pending (withdrawable)</dt>
+                            <dt>Pending (to ROI wallet)</dt>
                             <dd><?= e(money($p['pending'])) ?></dd>
                         </div>
                         <div>
@@ -82,23 +82,18 @@ $back = $compoundOnly ? '/compound-packages' : '/my-packages';
                                 Compound <?= e(money($p['latest_part'])) ?>
                             </button>
                         </form>
-                        <form method="post" action="<?= e(url('/investments/withdraw')) ?>" class="inline-form" novalidate
-                            data-validate data-fee-pct="<?= e(\App\Models\Setting::num('withdraw_fee_pct')) ?>"
-                            data-confirm="Withdraw ${amount} from this plan? Principal goes down by the same amount.">
+                        <form method="post" action="<?= e(url('/investments/release')) ?>" class="inline-form" novalidate
+                            data-validate
+                            data-confirm="Move ${amount} from this plan to your Compound ROI wallet? Principal goes down by the same amount.">
                             <?= Csrf::field() ?>
                             <input type="hidden" name="id" value="<?= e($p['id']) ?>">
                             <input type="hidden" name="back" value="<?= e($back) ?>">
-                            <label class="sr-only" for="w-<?= e($p['id']) ?>">Amount to withdraw</label>
-                            <input class="input" id="w-<?= e($p['id']) ?>" name="amount" type="number" step="0.01" min="1"
+                            <label class="sr-only" for="w-<?= e($p['id']) ?>">Amount to move to Compound ROI wallet</label>
+                            <input class="input" id="w-<?= e($p['id']) ?>" name="amount" type="number" step="0.01" min="0.01"
                                 max="<?= e($p['pending']) ?>" inputmode="decimal" required value="<?= e($p['pending']) ?>"
                                 aria-describedby="err-w-<?= e($p['id']) ?>"
-                                data-invalid="Enter $1.00 to <?= e(money($p['pending'])) ?>." <?= (float) $p['pending'] >= 1 ? '' : ' disabled' ?>>
-                            <button class="btn btn--ghost" type="submit" <?= (float) $p['pending'] >= 1 ? '' : ' disabled' ?>>Withdraw</button>
-                            <label class="sr-only" for="wt-<?= e($p['id']) ?>">Transaction password</label>
-                            <input class="input input--full" id="wt-<?= e($p['id']) ?>" name="txn_password" type="password" required
-                                maxlength="64" autocomplete="off" placeholder="Transaction password"
-                                aria-describedby="err-w-<?= e($p['id']) ?>" data-required="Enter your transaction password."
-                                <?= (float) $p['pending'] >= 1 ? '' : ' disabled' ?>>
+                                data-invalid="Enter up to <?= e(money($p['pending'])) ?>." <?= (float) $p['pending'] > 0 ? '' : ' disabled' ?>>
+                            <button class="btn btn--ghost" type="submit" <?= (float) $p['pending'] > 0 ? '' : ' disabled' ?>>To ROI Wallet</button>
                             <p class="field-error" id="err-w-<?= e($p['id']) ?>"></p>
                         </form>
                     </div>

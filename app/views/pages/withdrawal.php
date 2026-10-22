@@ -11,17 +11,19 @@
  */
 
 use App\Csrf;
+use App\Models\Transfer;
 
 $oldSource = old('source', 'income');
-$wallets = [
-    'roi' => ['ROI Wallet', (float) $user['roi_balance']],
-    'income' => ['Income Wallet', (float) $user['income_balance']],
-];
+$wallets = [];
+foreach (Transfer::SOURCES as $value => $label) {
+    $wallets[$value] = [$label, (float) $user[$value . '_balance']];
+}
 ?>
 <?php partial('page-head', ['heading' => 'Withdrawal', 'subtitle' => 'Requests are sent manually by the admin to your BEP-20 wallet.', 'icon' => 'card']) ?>
 
-<section class="stat-grid" aria-label="Balances">
-    <?php partial('stat-card', ['label' => 'ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green']) ?>
+<section class="stat-grid stat-grid--4" aria-label="Balances">
+    <?php partial('stat-card', ['label' => 'Compound ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green']) ?>
+    <?php partial('stat-card', ['label' => 'FD ROI Wallet', 'value' => money($user['fd_balance']), 'tone' => 'cyan']) ?>
     <?php partial('stat-card', ['label' => 'Income Wallet', 'value' => money($user['income_balance']), 'tone' => 'amber']) ?>
     <?php partial('stat-card', ['label' => 'Left today (limit ' . money($limit) . ')', 'value' => money($left), 'tone' => 'cyan']) ?>
 </section>
@@ -43,7 +45,7 @@ $wallets = [
 
             <fieldset class="choice-set">
                 <legend class="field__label">From</legend>
-                <div class="choice-grid">
+                <div class="choice-grid choice-grid--3">
                     <?php foreach ($wallets as $value => [$label, $balance]): ?>
                         <label class="choice">
                             <input type="radio" name="source" value="<?= e($value) ?>" <?= $oldSource === $value ? ' checked' : '' ?> required>
@@ -64,7 +66,7 @@ $wallets = [
                     data-invalid="Enter <?= e(money($min)) ?> to <?= e(money(min($max, $left))) ?>.">
                 <p class="field__hint" id="hint-amount">
                     <?= e(money($min)) ?> – <?= e(money($max)) ?> per request · fee <?= e(pct($fee)) ?> ·
-                    daily limit = your investment (last matured plans if none is running). Plan principal: withdraw from <a class="link-inline"
+                    daily limit = your investment (last matured plans if none is running). Compound plan pending: move it to your Compound ROI wallet from <a class="link-inline"
                         href="<?= e(url('/my-packages')) ?>">My Packages</a>.
                 </p>
                 <?= field_error('amount') ?>

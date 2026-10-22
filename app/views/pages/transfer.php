@@ -12,16 +12,17 @@ use App\Csrf;
 use App\Models\Transfer;
 
 $oldSource = old('source', 'income');
-$wallets = [
-    'roi' => [Transfer::SOURCES['roi'], (float) $user['roi_balance']],
-    'income' => [Transfer::SOURCES['income'], (float) $user['income_balance']],
-];
+$wallets = [];
+foreach (Transfer::SOURCES as $value => $label) {
+    $wallets[$value] = [$label, (float) $user[$value . '_balance']];
+}
 ?>
-<?php partial('page-head', ['heading' => 'Transfer', 'subtitle' => 'Send to another member, or move ROI / Income into your Deposit wallet. No fee.', 'icon' => 'transfer']) ?>
+<?php partial('page-head', ['heading' => 'Transfer', 'subtitle' => 'Send to another member, or move Compound ROI / FD ROI / Income into your Deposit wallet. No fee.', 'icon' => 'transfer']) ?>
 
-<section class="stat-grid" aria-label="Balances">
+<section class="stat-grid stat-grid--4" aria-label="Balances">
     <?php partial('stat-card', ['label' => 'Deposit Wallet', 'value' => money($user['deposit_balance']), 'tone' => 'cyan']) ?>
-    <?php partial('stat-card', ['label' => 'ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green']) ?>
+    <?php partial('stat-card', ['label' => 'Compound ROI Wallet', 'value' => money($user['roi_balance']), 'tone' => 'green']) ?>
+    <?php partial('stat-card', ['label' => 'FD ROI Wallet', 'value' => money($user['fd_balance']), 'tone' => 'cyan']) ?>
     <?php partial('stat-card', ['label' => 'Income Wallet', 'value' => money($user['income_balance']), 'tone' => 'amber']) ?>
 </section>
 
@@ -33,16 +34,18 @@ $wallets = [
             <p class="form__note"><?= icon('alert', 16) ?> P2P unlocks after your first approved deposit.
                 <a class="link-inline" href="<?= e(url('/deposit')) ?>">Deposit now</a></p>
         <?php endif ?>
-        <form method="post" action="<?= e(url('/transfer/p2p')) ?>" class="form" novalidate data-validate data-p2p
-            data-lookup="<?= e(url('/transfer/lookup')) ?>" data-confirm="Send ${p2p_amount} to {user_code}?">
+        <form method="post" action="<?= e(url('/transfer/p2p')) ?>" class="form" novalidate data-validate
+            data-confirm="Send ${p2p_amount} to {receiver_name} ({user_code})? Check the name before confirming.">
             <?= Csrf::field() ?>
+            <input type="hidden" name="receiver_name" data-lookup-name>
             <div class="field">
                 <label class="field__label" for="f-code">Receiver User ID</label>
                 <input class="input input--mono" id="f-code" name="user_code" type="text" required maxlength="12"
                     autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="GL0000001"
                     value="<?= e(old('user_code')) ?>" aria-describedby="err-user_code hint-code"
-                    <?= invalid_attr('user_code') ?> data-required="Enter the receiver's User ID.">
-                <p class="field__hint" id="hint-code" data-receiver aria-live="polite">Enter the ID to see the receiver's name.</p>
+                    <?= invalid_attr('user_code') ?> data-required="Enter the receiver's User ID."
+                    data-lookup="<?= e(url('/transfer/lookup')) ?>" data-lookup-label="Receiver">
+                <p class="field__hint" id="hint-code" data-lookup-out aria-live="polite">Enter the ID to see the receiver's name.</p>
                 <?= field_error('user_code') ?>
             </div>
             <div class="field">
@@ -63,13 +66,13 @@ $wallets = [
 
     <section class="card card--pad" aria-labelledby="move-title">
         <h2 class="card__title" id="move-title">Move to Deposit Wallet</h2>
-        <p class="field__hint">Your own ROI or Income wallet into your own Deposit wallet, for investing.</p>
+        <p class="field__hint">Your own Compound ROI, FD ROI or Income wallet into your own Deposit wallet, for investing.</p>
         <form method="post" action="<?= e(url('/transfer/wallet')) ?>" class="form" novalidate data-validate
             data-confirm="Move ${move_amount} to your Deposit wallet?">
             <?= Csrf::field() ?>
             <fieldset class="choice-set">
                 <legend class="field__label">From</legend>
-                <div class="choice-grid">
+                <div class="choice-grid choice-grid--3">
                     <?php foreach ($wallets as $value => [$label, $balance]) : ?>
                         <label class="choice">
                             <input type="radio" name="source" value="<?= e($value) ?>" <?= $oldSource === $value ? ' checked' : '' ?> required>

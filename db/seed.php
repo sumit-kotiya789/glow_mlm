@@ -174,7 +174,7 @@ function seed_database(PDO $pdo): void
         Deposit::submit($level1[5], 40, $tx());
         Withdrawal::request($level1[0], 'income', 5);
         $planId = (int) Database::value("SELECT id FROM investments WHERE user_id = ? AND plan = 'compound'", [$level1[0]]);
-        Withdrawal::request($level1[0], 'plan', 8, $planId);            // reject = back into plan pending
+        Investment::release($level1[0], $planId, 8);                       // pending -> Compound ROI wallet
         Withdrawal::request($root, 'roi', 2);
         Withdrawal::markPaid(Withdrawal::request($level1[2], 'roi', 2), $tx(), 'Sent manually (demo).');
         LuckyDraw::create('Weekly Lucky Draw #2', 10, 100);                 // draft: pick 10, fill 90, distribute

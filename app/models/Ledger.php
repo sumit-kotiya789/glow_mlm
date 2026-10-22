@@ -16,7 +16,16 @@ final class Ledger
     private const BALANCE_COLUMNS = [
         'deposit' => 'deposit_balance',
         'roi' => 'roi_balance',
+        'fd' => 'fd_balance',
         'income' => 'income_balance',
+    ];
+
+    /** Wallet names. roi = Compound plan returns, fd = Fixed Deposit returns. */
+    public const WALLETS = [
+        'deposit' => 'Deposit Wallet',
+        'roi' => 'Compound ROI Wallet',
+        'fd' => 'FD ROI Wallet',
+        'income' => 'Income Wallet',
     ];
 
     public const TYPES = [
@@ -27,6 +36,7 @@ final class Ledger
         'locked_roi' => 'Locked ROI',
         'maturity' => 'Plan maturity',
         'compound' => 'Compounded',
+        'release' => 'Pending to Compound ROI',
         'direct' => 'Direct sponsor income',
         'level' => 'Level deposit income',
         'roi_on_roi' => 'Level ROI income',
@@ -46,7 +56,7 @@ final class Ledger
     public const INCOME_TYPES = ['direct', 'level', 'roi_on_roi', 'salary', 'lucky'];
 
     /**
-     * @param string $wallet deposit|roi|income, or plan (history only, no wallet balance)
+     * @param string $wallet deposit|roi|fd|income, or plan (history only, no wallet balance)
      * @param array{from_user_id?: int, level?: int, ref_id?: int, note?: string} $meta
      * @throws DomainException when a debit would make the balance negative
      */
@@ -95,7 +105,7 @@ final class Ledger
     }
 
     /**
-     * Wallet statement: deposit / roi / income movements (all three when $wallet is null).
+     * Wallet statement: deposit / roi / fd / income movements (all of them when $wallet is null).
      *
      * @return array{rows: list<array<string, mixed>>, page: int, pages: int, total: int}
      */
@@ -105,7 +115,7 @@ final class Ledger
         return Database::paginate(
             "SELECT l.*, f.user_code AS from_code, i.plan AS plan FROM ledger l
              LEFT JOIN users f ON f.id = l.from_user_id
-             LEFT JOIN investments i ON i.id = l.ref_id AND l.type IN ('profit', 'maturity')
+             LEFT JOIN investments i ON i.id = l.ref_id AND l.type IN ('profit', 'maturity', 'release')
              WHERE l.user_id = ? AND l.wallet IN (" . Database::placeholders($wallets) . ')
              ORDER BY l.id DESC',
             array_merge([$userId], $wallets),
@@ -153,8 +163,8 @@ final class Ledger
     }
 
     /**
-     * Everything the ROI wallet received from plans, split by plan type (display only, reads the ledger):
-     * Compound = daily profit + maturity payout, Fixed = maturity payout (principal + locked ROI).
+     * Everything the two ROI wallets received from plans, by plan type (display only, reads the ledger):
+     * Compound = daily profit + pending moved to the wallet + maturity payout, Fixed = maturity payout (principal + locked ROI).
      * A rejected plan withdrawal refunded to ROI after the plan matured counts for its plan too.
      *
      * @return array{fixed: float, compound: float}
@@ -165,7 +175,7 @@ final class Ledger
         $rows = array_merge(
             Database::all(
                 "SELECT i.plan, SUM(l.amount) AS total FROM ledger l JOIN investments i ON i.id = l.ref_id
-                 WHERE l.user_id = ? AND l.wallet = 'roi' AND l.type IN ('profit', 'maturity') GROUP BY i.plan",
+                 WHERE l.user_id = ? AND l.wallet IN ('roi', 'fd') AND l.type IN ('profit', 'maturity', 'release') GROUP BY i.plan",
                 [$userId]
             ),
             Database::all(
@@ -185,22 +195,19 @@ final class Ledger
     }
 
     /**
-     * The three boxes: Fixed returns, Compound returns, All income combined.
+     * Lifetime returns per plan type, kept apart: Compound, Fixed Deposit.
      *
      * @return list<array{label: string, value: string, tone: string, hint: string}>
      */
     public static function returnCards(int $userId): array
     {
         $roi = self::roiReturns($userId);
-        $income = self::sum($userId, self::INCOME_TYPES);
         $locked = Investment::summary($userId)['locked'];
         return [
-            ['label' => 'Fixed Returns', 'value' => money($roi['fixed']), 'tone' => 'cyan',
-                'hint' => 'Matured Fixed plans · locked now ' . money($locked)],
             ['label' => 'Compound Returns', 'value' => money($roi['compound']), 'tone' => 'green',
-                'hint' => 'Daily profit + matured Compound plans'],
-            ['label' => 'All Income Combined', 'value' => money($roi['fixed'] + $roi['compound'] + $income), 'tone' => 'gold',
-                'hint' => 'Fixed + Compound + Income wallet earnings'],
+                'hint' => 'Daily profit + pending moved here + matured Compound plans'],
+            ['label' => 'FD Returns', 'value' => money($roi['fixed']), 'tone' => 'cyan',
+                'hint' => 'Matured Fixed plans · locked now ' . money($locked)],
         ];
     }
 

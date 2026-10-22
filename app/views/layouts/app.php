@@ -22,8 +22,10 @@
 </main>
 <?php partial('bottom-nav') ?>
 <?php partial('modal') ?>
+<?php partial('notice') ?>
 <?php partial('toast') ?>
 <script src="<?= e(asset('js/toast.js')) ?>" defer></script>
+<script src="<?= e(asset('js/notice.js')) ?>" defer></script>
 <?php foreach ($scripts ?? [] as $script) : ?>
 <script src="<?= e(asset($script)) ?>" defer></script>
 <?php endforeach ?>

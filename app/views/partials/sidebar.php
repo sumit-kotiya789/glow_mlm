@@ -41,8 +41,7 @@ $here = current_path();
 <nav class="sidebar" id="sidebar" aria-label="Main menu" inert>
     <div class="sidebar__grab" aria-hidden="true"></div>
     <a class="sidebar__brand" href="<?= e(url('/dashboard')) ?>" aria-label="GLOW dashboard">
-        <span class="brand__mark" aria-hidden="true"><?= icon('zap', 18) ?></span>
-        <span class="brand__word">GL<span class="brand__o">O</span>W</span>
+        <img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="GLOW">
         <span class="sidebar__tag">Member</span>
     </a>
     <?php foreach ($sections as $heading => $links) : ?>

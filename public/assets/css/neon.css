@@ -750,3 +750,8 @@ body.guest { background: var(--bg); }
     .ticker__track { animation: none; }
     .ticker__row { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
 }
+/* logo image */
+.brand__logo { display: block; height: 36px; width: auto; }
+.logo-img { display: block; width: 150px; max-width: 60%; height: auto; }
+.auth-card .logo-img { justify-self: center; margin: 0 auto; }
+.sidebar__brand .brand__logo { height: 44px; }

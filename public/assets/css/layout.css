@@ -413,3 +413,7 @@ body.guest {
         padding-left: calc(260px + var(--gutter));
     }
 }
+
+/* logo image */
+.brand__logo { display: block; height: 36px; width: auto; }
+.logo-img { display: block; width: 150px; max-width: 60%; height: auto; }

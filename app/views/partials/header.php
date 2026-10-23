@@ -7,7 +7,7 @@ $admin = $admin ?? false;
 ?>
 <header class="topbar">
     <a class="brand" href="<?= e(url($admin ? '/admin' : '/dashboard')) ?>" aria-label="GLOW <?= $admin ? 'admin' : 'dashboard' ?>">
-        <span class="brand__word">GL<span class="brand__o">O</span>W</span><?php if ($admin) : ?><span class="brand__tag">Admin</span><?php endif ?>
+        <img class="brand__logo" src="<?= e(asset('img/logo.png')) ?>" alt="GLOW"><?php if ($admin) : ?><span class="brand__tag">Admin</span><?php endif ?>
     </a>
     <span class="demo-badge">WEALTH IN PROGRESS</span>
     <div class="topbar__actions">

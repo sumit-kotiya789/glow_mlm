@@ -4,7 +4,8 @@
 <meta name="theme-color" content="<?= $theme === 'neon' ? '#0a0805' : '#0a1020' ?>">
 <meta name="robots" content="noindex">
 <title><?= e($title ?? 'GLOW') ?> · GLOW</title>
-<link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">
+<link rel="icon" href="<?= e(asset('img/favicon-64.png')) ?>" type="image/png" sizes="64x64">
+<link rel="apple-touch-icon" href="<?= e(asset('img/favicon-192.png')) ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <?php if ($theme === 'neon') : ?>

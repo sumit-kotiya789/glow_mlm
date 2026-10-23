@@ -8,6 +8,7 @@ use App\Auth;
 use App\Database;
 use App\Models\Investment;
 use App\Models\PlanTerm;
+use App\Models\Setting;
 use App\Models\TradePair;
 use App\Services\Salary;
 
@@ -18,7 +19,14 @@ final class DashboardController
 {
     public function home(): void
     {
-        redirect(Auth::check() ? '/dashboard' : '/login');
+        if (Auth::check()) {
+            redirect('/dashboard');
+        }
+        view('landing', [
+            'title' => 'Digital Money Earn',
+            'terms' => PlanTerm::all(),
+            'levelPcts' => Setting::roiLevels(),
+        ], 'landing');
     }
 
     public function index(): void

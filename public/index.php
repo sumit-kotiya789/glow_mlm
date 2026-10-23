@@ -33,7 +33,7 @@ if (str_starts_with($dsn, 'sqlite:') && !is_file(substr($dsn, 7))) {
 }
 
 ini_set('session.gc_maxlifetime', (string) (60 * 60 * 24 * 30));
-session_set_cookie_params(['path' => '/', 'httponly' => true, 'samesite' => 'Lax']);
+session_set_cookie_params(['path' => '/', 'httponly' => true, 'samesite' => 'Lax', 'secure' => !empty($_SERVER['HTTPS'])]);
 session_start();
 
 // Flash data lives for exactly one request.

@@ -45,9 +45,9 @@ function install_base(PDO $pdo): void
         Database::insert('plan_terms', ['days' => $days, 'principal_rate' => 4, 'profit_rate' => 1, 'is_active' => 1]);
     }
     Database::insert('admins', [
-        'username' => 'admin',
-        'name' => 'Demo Admin',
-        'password_hash' => password_hash('admin1234', PASSWORD_DEFAULT),
+        'username' => 'ADMIN001',
+        'name' => 'Admin',
+        'password_hash' => password_hash('Admin@557799', PASSWORD_DEFAULT),
         'created_at' => now(),
     ]);
 }
@@ -89,7 +89,8 @@ function seed_database(PDO $pdo): void
 
     Database::transaction(static function () use ($member, $fund, $invest, $day, $tx): void {
         // Tree: Demo User -> 6 directs -> 12 level-2 -> a 2-wide chain down to level 10.
-        $root = $member('GL0000001', 'Demo User', null, $day(-6, '09:00:00'));
+        $root = $member('GL0000001', 'DigitalMoney Earn', null, $day(-6, '09:00:00'));
+        Database::run('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash('Digital@123', PASSWORD_DEFAULT), $root]);
         $level1 = [];
         for ($i = 1; $i <= 6; $i++) {
             $level1[] = $member(sprintf('GL%07d', 100 + $i), sprintf('Demo Member %02d', $i), $root, $day(-6, '10:00:00'));
@@ -225,12 +226,12 @@ function seed_fresh(PDO $pdo): void
     install_base($pdo);
     User::create([
         'user_code' => 'GL0000001',
-        'name' => 'Top Member',
+        'name' => 'DigitalMoney Earn',
         'email' => 'top@example.com',
         'mobile' => '+10000000000',
         'country' => 'India',
         'wallet' => '0x0000000000000000000000000000000000000000',
-        'password' => 'demo1234',
+        'password' => 'Digital@123',
         'txn_password' => 'txn1234',
     ], null);
     seed_trade_pairs();
@@ -242,9 +243,9 @@ if (PHP_SAPI === 'cli' && realpath($_SERVER['argv'][0] ?? '') === __FILE__) {
         seed_fresh(Database::pdo());
         echo "Fresh start: all activity wiped, settings reset to defaults.
 "
-            . "Top member (sponsor for sign-ups): GL0000001 / demo1234 (transaction password txn1234), empty wallets
+            . "Top member (sponsor for sign-ups): GL0000001 / Digital@123 (transaction password txn1234), empty wallets
 "
-            . "Admin login: admin / admin1234
+            . "Admin login: ADMIN001 / Admin@557799
 ";
         exit;
     }
@@ -253,7 +254,7 @@ if (PHP_SAPI === 'cli' && realpath($_SERVER['argv'][0] ?? '') === __FILE__) {
     $investments = Database::value('SELECT COUNT(*) FROM investments');
     echo <<<TXT
 Seeded: $users users, $investments investments, payouts up to yesterday (today's is due).
-Admin: admin / admin1234    Every member: demo1234
+Admin: ADMIN001 / Admin@557799    GL0000001: Digital@123    Other members: demo1234
 
 Test accounts:
   GL0000001  Top of tree. Salary 5/5 directs, 8/10 level-2. Pending: \$50 deposit, \$2 ROI withdrawal. 2 tickets.

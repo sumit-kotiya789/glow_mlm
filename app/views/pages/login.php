@@ -4,9 +4,6 @@
     <?php partial('logo-box') ?>
     <h1 class="auth-card__title" id="auth-title">Sign Into Your Account</h1>
 
-    <p class="hint-box"><?= icon('sparkle', 18) ?>
-        <span>Demo login: <strong>GL0000001</strong> / <strong>demo1234</strong></span></p>
-
     <form method="post" action="<?= e(url('/login')) ?>" novalidate data-validate>
         <?= Csrf::field() ?>
         <div class="float-field">

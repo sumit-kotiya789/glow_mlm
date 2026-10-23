@@ -29,10 +29,10 @@ XAMPP / Apache alternative: `http://localhost/MLM/GLOW/public/` (needs `mod_rewr
 
 | Who    | Login       | Password                                  |
 | ------ | ----------- | ----------------------------------------- |
-| Member | `GL0000001` | `demo1234`                                |
-| Admin  | `admin`     | `admin1234` → http://localhost:8000/admin |
+| Member | `GL0000001` | `Digital@123`                             |
+| Admin  | `ADMIN001`  | `Admin@557799` → http://localhost:8000/admin |
 
-Every seeded member (`GL0000101`…) uses `demo1234`. **Transaction password** (withdrawal, P2P, transfer) for every seeded member is `txn1234`; members set or change it under Profile. The seeder builds a 35-member tree over 10 levels (plus 100 extra investors at levels 3-4) by running
+Every other seeded member (`GL0000101`…) uses `demo1234`. **Transaction password** (withdrawal, P2P, transfer) for every seeded member is `txn1234`; members set or change it under Profile. The seeder builds a 35-member tree over 10 levels (plus 100 extra investors at levels 3-4) by running
 the real engine: approved deposits, investments, 4 days of payouts, one lucky draw, and some pending
 deposits/withdrawals for the admin. Today's payout is left due.
 
@@ -62,6 +62,9 @@ php cron/payout.php --next=25    # testing: pay the next 25 periods right now
 Admin → Settings → **Payout period**: `Day` (live) or `Hour` (testing: every "day" of the rules lasts one hour,
 so a 25-day plan matures after 25 hours). Salary window/pay day and the daily withdrawal limit stay on calendar days.
 Schedule `cron/payout.php` every 15 minutes in Windows Task Scheduler. A period is never paid twice.
+
+**Hostinger:** hPanel → Advanced → Cron Jobs → PHP, every 15 min (`*/15 * * * *`), command
+`/usr/bin/php /home/uXXXX/domains/YOURDOMAIN/public_html/cron/payout.php`.
 
 ## Engine check
 

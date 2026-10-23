@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 22, 2026 at 05:08 PM
+-- Generation Time: Oct 23, 2026 at 08:35 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.1.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -33,14 +33,14 @@ CREATE TABLE `admins` (
   `name` varchar(80) NOT NULL,
   `password_hash` varchar(255) NOT NULL,
   `created_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `admins`
 --
 
 INSERT INTO `admins` (`id`, `username`, `name`, `password_hash`, `created_at`) VALUES
-(1, 'admin', 'Demo Admin', '$2y$10$bnrcg9QPB2V49qTXHs47ROzCDjiWq2zkdHtmaRwnvBzNUxkKSa9za', '2026-10-22 20:38:01');
+(1, 'ADMIN001', 'Admin', '$2y$10$9agPHg8kOS.Px65HokJhsO94Q9XqAnFLtnu6V4OFCnZltRgHm7n9a', '2026-10-23 12:03:03');
 
 -- --------------------------------------------------------
 
@@ -57,7 +57,7 @@ CREATE TABLE `deposits` (
   `admin_note` varchar(255) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `reviewed_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -82,7 +82,7 @@ CREATE TABLE `investments` (
   `started_at` datetime NOT NULL,
   `last_paid_on` varchar(16) DEFAULT NULL,
   `matured_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -101,7 +101,7 @@ CREATE TABLE `ledger` (
   `ref_id` int(11) DEFAULT NULL,
   `note` varchar(160) NOT NULL DEFAULT '',
   `created_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -117,7 +117,7 @@ CREATE TABLE `lucky_draws` (
   `status` varchar(12) NOT NULL DEFAULT 'Draft',
   `created_at` datetime NOT NULL,
   `distributed_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -130,7 +130,7 @@ CREATE TABLE `lucky_draw_winners` (
   `draw_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `picked_by` varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -142,7 +142,7 @@ CREATE TABLE `payout_runs` (
   `run_date` varchar(16) NOT NULL,
   `investments_paid` int(11) NOT NULL,
   `created_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -156,7 +156,7 @@ CREATE TABLE `plan_terms` (
   `principal_rate` decimal(6,3) NOT NULL,
   `profit_rate` decimal(6,3) NOT NULL,
   `is_active` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `plan_terms`
@@ -176,7 +176,7 @@ INSERT INTO `plan_terms` (`id`, `days`, `principal_rate`, `profit_rate`, `is_act
 CREATE TABLE `settings` (
   `name` varchar(60) NOT NULL,
   `value` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `settings`
@@ -224,7 +224,7 @@ CREATE TABLE `tickets` (
   `admin_reply` text DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `replied_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -241,43 +241,43 @@ CREATE TABLE `trade_pairs` (
   `latest_price` decimal(20,6) NOT NULL,
   `pnl` decimal(10,2) NOT NULL,
   `updated_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `trade_pairs`
 --
 
 INSERT INTO `trade_pairs` (`id`, `pair`, `side`, `leverage`, `entry_price`, `latest_price`, `pnl`, `updated_at`) VALUES
-(1, 'BTC/USDT', 'Long', 15, 56960.000000, 73079.680000, 424.50, '2026-10-22 20:22:01'),
-(2, 'ETH/USDT', 'Short', 15, 1944.000000, 1842.912000, 78.00, '2026-10-22 19:40:01'),
-(3, 'BNB/USDT', 'Long', 10, 534.000000, 682.452000, 278.00, '2026-10-22 19:29:01'),
-(4, 'SOL/USDT', 'Long', 15, 159.600000, 179.390400, 186.00, '2026-10-22 20:13:01'),
-(5, 'XRP/USDT', 'Long', 20, 0.431600, 0.616756, 858.00, '2026-10-22 19:45:01'),
-(6, 'ADA/USDT', 'Long', 10, 0.391400, 0.396488, 13.00, '2026-10-22 20:17:01'),
-(7, 'DOGE/USDT', 'Long', 5, 0.098400, 0.098498, 0.50, '2026-10-22 19:30:01'),
-(8, 'TRX/USDT', 'Long', 10, 0.118300, 0.170234, 439.00, '2026-10-22 19:09:01'),
-(9, 'DOT/USDT', 'Short', 15, 5.890000, 6.225730, -85.50, '2026-10-22 20:02:01'),
-(10, 'LINK/USDT', 'Long', 15, 15.660000, 16.756200, 105.00, '2026-10-22 20:02:01'),
-(11, 'MATIC/USDT', 'Long', 10, 0.798000, 1.092462, 369.00, '2026-10-22 19:35:01'),
-(12, 'LTC/USDT', 'Short', 20, 69.120000, 68.636160, 14.00, '2026-10-22 19:14:01'),
-(13, 'AVAX/USDT', 'Short', 5, 22.400000, 19.107200, 73.50, '2026-10-22 19:56:01'),
-(14, 'UNI/USDT', 'Long', 10, 7.622000, 7.782062, 21.00, '2026-10-22 20:31:01'),
-(15, 'ATOM/USDT', 'Long', 10, 6.966000, 6.234570, -105.00, '2026-10-22 20:35:01'),
-(16, 'XLM/USDT', 'Long', 20, 0.100100, 0.135035, 698.00, '2026-10-22 19:34:01'),
-(17, 'FIL/USDT', 'Long', 10, 4.324000, 4.860176, 124.00, '2026-10-22 20:08:01'),
-(18, 'ICP/USDT', 'Long', 5, 9.858000, 13.456170, 182.50, '2026-10-22 19:21:01'),
-(19, 'VET/USDT', 'Long', 5, 0.024500, 0.028249, 76.50, '2026-10-22 19:46:01'),
-(20, 'ETC/USDT', 'Short', 20, 25.080000, 36.340920, -898.00, '2026-10-22 19:59:01'),
-(21, 'NEAR/USDT', 'Short', 10, 4.335000, 3.806130, 122.00, '2026-10-22 19:27:01'),
-(22, 'APT/USDT', 'Long', 10, 8.352000, 9.145440, 95.00, '2026-10-22 20:23:01'),
-(23, 'ARB/USDT', 'Long', 5, 0.954000, 1.019826, 34.50, '2026-10-22 19:54:01'),
-(24, 'OP/USDT', 'Long', 20, 2.052000, 2.735316, 666.00, '2026-10-22 19:21:01'),
-(25, 'SHIB/USDT', 'Short', 5, 0.000018, 0.000022, -136.50, '2026-10-22 20:35:01'),
-(26, 'INJ/USDT', 'Long', 20, 19.440000, 26.555040, 732.00, '2026-10-22 19:40:01'),
-(27, 'SUI/USDT', 'Long', 20, 1.221000, 1.388277, 274.00, '2026-10-22 19:51:01'),
-(28, 'AAVE/USDT', 'Long', 20, 101.920000, 118.634880, 328.00, '2026-10-22 19:44:01'),
-(29, 'ALGO/USDT', 'Long', 5, 0.170000, 0.149600, -60.00, '2026-10-22 19:52:01'),
-(30, 'SAND/USDT', 'Long', 5, 0.352800, 0.449820, 137.50, '2026-10-22 20:07:01');
+(1, 'BTC/USDT', 'Short', 5, 60160.000000, 67439.360000, -60.50, '2026-10-23 10:35:03'),
+(2, 'ETH/USDT', 'Short', 20, 2376.000000, 2950.992000, -484.00, '2026-10-23 10:40:03'),
+(3, 'BNB/USDT', 'Long', 5, 714.000000, 823.242000, 76.50, '2026-10-23 11:38:03'),
+(4, 'SOL/USDT', 'Long', 5, 141.400000, 127.542800, -49.00, '2026-10-23 10:56:03'),
+(5, 'XRP/USDT', 'Short', 5, 0.468000, 0.544752, -82.00, '2026-10-23 11:49:03'),
+(6, 'ADA/USDT', 'Long', 5, 0.345800, 0.371389, 37.00, '2026-10-23 11:15:03'),
+(7, 'DOGE/USDT', 'Long', 15, 0.110400, 0.098146, -166.50, '2026-10-23 11:08:03'),
+(8, 'TRX/USDT', 'Long', 10, 0.104000, 0.100568, -33.00, '2026-10-23 11:29:03'),
+(9, 'DOT/USDT', 'Long', 5, 6.820000, 8.777340, 143.50, '2026-10-23 10:33:03'),
+(10, 'LINK/USDT', 'Long', 10, 15.370000, 19.719710, 283.00, '2026-10-23 11:00:03'),
+(11, 'MATIC/USDT', 'Long', 10, 0.665000, 0.712215, 71.00, '2026-10-23 11:12:03'),
+(12, 'LTC/USDT', 'Long', 15, 66.960000, 60.799680, -138.00, '2026-10-23 11:50:03'),
+(13, 'AVAX/USDT', 'Long', 15, 27.160000, 34.384560, 399.00, '2026-10-23 11:22:03'),
+(14, 'UNI/USDT', 'Long', 10, 7.326000, 9.714276, 326.00, '2026-10-23 11:42:03'),
+(15, 'ATOM/USDT', 'Short', 20, 6.561000, 8.181567, -494.00, '2026-10-23 11:00:03'),
+(16, 'XLM/USDT', 'Long', 10, 0.121000, 0.150524, 244.00, '2026-10-23 11:51:03'),
+(17, 'FIL/USDT', 'Long', 10, 3.680000, 3.396640, -77.00, '2026-10-23 11:10:03'),
+(18, 'ICP/USDT', 'Short', 10, 10.695000, 10.769865, -7.00, '2026-10-23 11:01:03'),
+(19, 'VET/USDT', 'Long', 20, 0.029250, 0.034164, 336.00, '2026-10-23 11:19:03'),
+(20, 'ETC/USDT', 'Long', 15, 22.660000, 20.348680, -153.00, '2026-10-23 11:06:03'),
+(21, 'NEAR/USDT', 'Long', 20, 5.763000, 5.797578, 12.00, '2026-10-23 11:27:03'),
+(22, 'APT/USDT', 'Long', 20, 7.917000, 7.054047, -218.00, '2026-10-23 10:59:03'),
+(23, 'ARB/USDT', 'Long', 15, 0.792000, 0.700920, -172.50, '2026-10-23 10:38:03'),
+(24, 'OP/USDT', 'Long', 5, 1.710000, 2.005830, 86.50, '2026-10-23 10:53:03'),
+(25, 'SHIB/USDT', 'Short', 5, 0.000021, 0.000027, -135.50, '2026-10-23 10:53:03'),
+(26, 'INJ/USDT', 'Long', 10, 24.720000, 32.407920, 311.00, '2026-10-23 11:40:03'),
+(27, 'SUI/USDT', 'Long', 20, 1.298000, 1.112386, -286.00, '2026-10-23 11:26:03'),
+(28, 'AAVE/USDT', 'Short', 10, 89.180000, 96.849480, -86.00, '2026-10-23 10:39:03'),
+(29, 'ALGO/USDT', 'Long', 20, 0.139400, 0.196833, 824.00, '2026-10-23 11:48:03'),
+(30, 'SAND/USDT', 'Long', 20, 0.474600, 0.535349, 256.00, '2026-10-23 11:08:03');
 
 -- --------------------------------------------------------
 
@@ -309,14 +309,14 @@ CREATE TABLE `users` (
   `salary_last_month` varchar(7) DEFAULT NULL,
   `is_blocked` int(11) NOT NULL DEFAULT 0,
   `created_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `user_code`, `sponsor_id`, `name`, `email`, `mobile`, `country`, `wallet`, `password_hash`, `txn_password_hash`, `txn_fails`, `txn_locked_until`, `deposit_balance`, `roi_balance`, `fd_balance`, `income_balance`, `activated_at`, `signup_bonus_paid`, `salary_qualified_at`, `salary_months_paid`, `salary_last_month`, `is_blocked`, `created_at`) VALUES
-(1, 'GL0000001', NULL, 'Top Member', 'top@example.com', '+10000000000', 'India', '0x0000000000000000000000000000000000000000', '$2y$10$H.7p.7PLHqg2yM7FQ7etW.z7UGAENtHrjmgwOUg.KOzDAHNcPDjIu', '$2y$10$P9CoI8dfRInOGPkgvsnVx.TzoB23z/JIk8RsBbfZNzNxmCyRSgWma', 0, NULL, 0.00, 0.00, 0.00, 0.00, NULL, 0, NULL, 0, NULL, 0, '2026-10-22 20:38:01');
+(1, 'GL0000001', NULL, 'DigitalMoney Earn', 'top@example.com', '+10000000000', 'India', '0x0000000000000000000000000000000000000000', '$2y$10$z9T4TAwx6OKGG3PbETZcmO7gM9qiR7APWEsBQApoV9ziMOdmjUvKe', '$2y$10$Mx44cu/vc1IVbo/kYTv0j.xE7EkMbYJVe3g.Hjlfw1bFiGevWN2d2', 0, NULL, 0.00, 0.00, 0.00, 0.00, NULL, 0, NULL, 0, NULL, 0, '2026-10-23 12:03:03');
 
 -- --------------------------------------------------------
 
@@ -338,7 +338,7 @@ CREATE TABLE `withdrawals` (
   `payout_hash` varchar(100) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `processed_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Indexes for dumped tables

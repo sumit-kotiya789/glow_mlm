@@ -4,9 +4,6 @@
     <?php partial('logo-box') ?>
     <h1 class="auth-card__title" id="auth-title">Admin Panel</h1>
 
-    <p class="hint-box"><?= icon('sparkle', 18) ?>
-        <span>Demo admin: <strong>admin</strong> / <strong>admin1234</strong></span></p>
-
     <form method="post" action="<?= e(url('/admin/login')) ?>" novalidate data-validate>
         <?= Csrf::field() ?>
         <div class="float-field">
